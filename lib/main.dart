@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthenticationService>(
+        Provider<AuthenticationService?>(
             create: (_) => AuthenticationService(FirebaseAuth.instance)),
         StreamProvider(
             create: (context) =>
@@ -42,10 +42,11 @@ class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final firebaseuser = context.watch<User>();
+    final firebaseuser = context.watch<User?>();
     if (firebaseuser != null) {
       return HomePage();
     } else {
+      print('hello');
       return LoginPage();
     }
   }
