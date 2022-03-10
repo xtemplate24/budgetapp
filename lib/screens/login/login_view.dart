@@ -1,5 +1,6 @@
 import 'package:budgetapp/authentication/authentication_service.dart';
 import 'package:budgetapp/screens/home/home_view.dart';
+import 'package:budgetapp/screens/login/forgot_password_view.dart';
 import 'package:budgetapp/screens/login/signup_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -61,14 +62,26 @@ class LoginPage extends StatelessWidget {
                 });
               },
               child: const Text("Sign in")),
-          TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                );
-              },
-              child: const Text("Sign up"))
+          Row(
+            children: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpPage()),
+                    );
+                  },
+                  child: const Text("Sign up")),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                    );
+                  },
+                  child: const Text("Forgot password")),
+            ],
+          ),
         ],
       ),
     );

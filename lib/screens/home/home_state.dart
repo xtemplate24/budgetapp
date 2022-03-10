@@ -9,25 +9,29 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     print("in home page");
     return WillPopScope(
-        onWillPop: () async {
-          return false;
-        },
-        child: Scaffold(
-            body:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text("HOME PAGE"),
-          Text(user!.email.toString()),
-          ElevatedButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => LoginPage(),
-                  ),
-                  (route) => false);
-              },
-              child: Text("Logout"))
-        ])));
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("HOME PAGE"),
+            Text(user!.email.toString()),
+            ElevatedButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => LoginPage(),
+                      ),
+                      (route) => false);
+                },
+                child: Text("Logout"))
+          ],
+        ),
+      ),
+    );
   }
 }
