@@ -4,9 +4,11 @@ import 'package:budgetapp/screens/login/login_view.dart';
 import 'package:budgetapp/screens/login/signup_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,17 +35,21 @@ class MyApp extends StatelessWidget {
                 context.read<AuthenticationService>().authStateChanges,
             initialData: null)
       ],
-      child: MaterialApp(
-          title: "Flutter Demo",
-          theme: ThemeData(
-              primarySwatch: Colors.blue,
-              visualDensity: VisualDensity.adaptivePlatformDensity),
-          home: AuthenticationWrapper(),
-          routes: {
-            LoginPage.routeName: (context) => LoginPage(),
-            SignUpPage.routeName: (context) => SignUpPage(),
-            HomePage.routeName: (context) => HomePage(),
-          }),
+      child: Sizer(
+        builder: (context, orientation, deviceType) {
+          return MaterialApp(
+              title: "Flutter Demo",
+              theme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  visualDensity: VisualDensity.adaptivePlatformDensity),
+              home: AuthenticationWrapper(),
+              routes: {
+                LoginPage.routeName: (context) => LoginPage(),
+                SignUpPage.routeName: (context) => SignUpPage(),
+                HomePage.routeName: (context) => HomePage(),
+              });
+        },
+      ),
     );
   }
 }
@@ -51,8 +57,12 @@ class MyApp extends StatelessWidget {
 class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({Key? key}) : super(key: key);
   @override
+
   Widget build(BuildContext context) {
     final firebaseuser = context.watch<User?>();
+    
+
+
     if (firebaseuser != null) {
       print("Email verified");
       return HomePage();
