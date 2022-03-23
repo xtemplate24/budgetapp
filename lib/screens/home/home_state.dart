@@ -37,6 +37,19 @@ class HomePageState extends State<HomePage> {
                 ),
                 body: const Center(child: Text("Oops, something went wrong")));
           } else if (snapshot.hasData && !snapshot.data!.exists) {
+            users.doc(user!.uid) // <-- Document ID
+                .set({
+              'email': user!.email,
+              'income': 0,
+              'id': user!.uid
+            }) // <-- Your data
+                .then((_) {
+              print('Added');
+              return SetupPage();
+            }).catchError((error) {
+              print('Add failed: $error');
+              return HomePage();
+            });
             return SetupPage();
           } else if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> data =

@@ -14,6 +14,7 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _signInDisabled = true;
+  bool _passwordVisible = false;
   void changeSignInDisabled() {
     if (emailController.text.isEmpty == false &&
         passwordController.text.isEmpty == false) {
@@ -27,26 +28,49 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
+  @override
+  void initState() {
+    _passwordVisible = false;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("Login page"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
+          TextFormField(
             onChanged: (value) => {changeSignInDisabled()},
             controller: emailController,
             decoration: const InputDecoration(labelText: "Email"),
           ),
-          TextField(
-            obscureText: true,
+          TextFormField(
+            obscureText: !_passwordVisible,
             enableSuggestions: false,
             autocorrect: false,
             onChanged: (value) => {changeSignInDisabled()},
             controller: passwordController,
-            decoration: const InputDecoration(labelText: "Password"),
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              // Here is key idea
+              suffixIcon: IconButton(
+                icon: Icon(
+                  // Based on passwordVisible state choose the icon
+                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Theme.of(context).primaryColorDark,
+                ),
+                onPressed: () {
+                  // Update the state i.e. toogle the state of passwordVisible variable
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+              ),
+            ),
           ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -94,6 +118,7 @@ class LoginPageState extends State<LoginPage> {
               },
               child: const Text("Sign in")),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
                   onPressed: () {
