@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:budgetapp/components/color_theme.dart';
+import 'package:budgetapp/components/standard_alert.dart';
 import 'package:budgetapp/firebase_interactions/firebase_interactions.dart';
 import 'package:budgetapp/screens/home/home_state.dart';
 import 'package:flutter/material.dart';
@@ -20,12 +23,49 @@ class SetupPageState extends State<SetupPage> {
   User? user = FirebaseAuth.instance.currentUser;
   double? height;
   double? width;
+  List<String>? categoryList;
+  List<String> suggestionList = ["Transport", "Food", "Groceries"];
+  final categoryInputController = TextEditingController();
+  List<TextEditingController> controllers = [];
+  List<TextField> fields = [];
+  Map<String, int> finalCategoryMap = {};
 
   @override
   void initState() {
     super.initState();
     height = 100.h;
     width = 100.w;
+    categoryList = [];
+  }
+
+  void addToList(String categoryname) {
+    categoryname = categoryname.trim().toLowerCase();
+    final controller = TextEditingController();
+    final field = TextField(
+      keyboardType: TextInputType.number,
+      controller: controller,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: "budget per month",
+      ),
+    );
+    setState(() {
+      if (categoryList!.contains(categoryname)) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialogOneOption(
+                  title: "Oops",
+                  content: "Category already added",
+                  buttonText: "Okay",
+                  context: context);
+            });
+      } else {
+        categoryList!.add(categoryname);
+        controllers.add(controller);
+        fields.add(field);
+      }
+    });
   }
 
   @override
@@ -41,27 +81,100 @@ class SetupPageState extends State<SetupPage> {
     final pages = List.generate(
       2,
       ((index) => index == 0
-          ? Container(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    controller: budgetInputController,
-                    decoration:
-                        const InputDecoration(labelText: "Monthly income"),
+          ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              TextField(
+                keyboardType: TextInputType.number,
+                controller: budgetInputController,
+                decoration: const InputDecoration(labelText: "Monthly income"),
+              ),
+              const Text("This can be changed later too"),
+            ])
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Select a few categories for your expenses"),
+                Container(
+                  height: height! * 0.4,
+                  child: SingleChildScrollView(
+                    child: ListView.separated(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(8),
+                      itemCount: categoryList!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Dismissible(
+                          onDismissed: ((direction) {
+                            setState(() {
+                              categoryList!.removeAt(index);
+                              controllers.removeAt(index);
+                              fields.removeAt(index);
+                            });
+                          }),
+                          key: Key(categoryList![index]),
+                          background: Container(color: Colors.red),
+                          direction: DismissDirection.endToStart,
+                          child: Container(
+                            height: 50,
+                            child: Row(children: [
+                              Text(
+                                categoryList![index],
+                              ),
+                              Expanded(child: fields[index]),
+                            ]),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const Divider(),
+                    ),
                   ),
-                  const Text("This can be changed later too"),
-                ]))
-          : Container(
-              child: Text("Test"),
+                ),
+                Container(
+                  width: width! * 1,
+                  height: height! * 0.2,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: suggestionList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return TextButton(
+                              child: Text(suggestionList[index]),
+                              onPressed: () {
+                                addToList(suggestionList[index]);
+                                setState(() {
+                                  suggestionList.removeAt(index);
+                                });
+                              });
+                        }),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: categoryInputController,
+                        decoration: const InputDecoration(
+                            labelText: "Enter a custom category"),
+                      ),
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          addToList(categoryInputController.text);
+                          categoryInputController.clear();
+                        },
+                        child: Text("Add")),
+                  ],
+                ),
+              ],
             )),
     );
 
     Widget nextButton = ElevatedButton(
       child: Padding(
         padding: EdgeInsets.fromLTRB(width! * 0.2, 10, height! * 0.3, 10),
-        child: Text(
+        child: const Text(
           'Next',
           style: TextStyle(fontSize: 17, color: Colors.white),
         ),
@@ -74,19 +187,20 @@ class SetupPageState extends State<SetupPage> {
         elevation: 5.0,
       ),
       onPressed: () async {
-        
         if (pageController.page == 0) {
           await FirebaseInteractions.updateIncome(
-            users, user!.uid, int.parse(budgetInputController.text.trim()));
+              users, user!.uid, int.parse(budgetInputController.text.trim()));
           await pageController.nextPage(
               duration: Duration(milliseconds: 200), curve: Curves.easeIn);
         } else {
-          Navigator.of(context, rootNavigator: true).pop();
+          for (int i = 0; i < categoryList!.length; i++) {
+            finalCategoryMap[categoryList![i]] = controllers[i].text.isEmpty ? 0 : int.parse(controllers[i].text);
+          }
+          print(finalCategoryMap.toString());
+          Navigator.popAndPushNamed(context, '/HomePage');
         }
       },
     );
-
-
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -98,7 +212,7 @@ class SetupPageState extends State<SetupPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
-              height: height! * 0.5,
+              height: height! * 0.7,
               child: PageView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: pages.length,
