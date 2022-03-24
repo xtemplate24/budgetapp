@@ -211,13 +211,11 @@ class SetupPageState extends State<SetupPage> {
     );
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("Setup page"),
       ),
       body: Container(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
               height: height! * 0.7,
