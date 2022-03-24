@@ -23,4 +23,15 @@ class FirebaseInteractions {
       });
     }
   }
+
+  static Future<void> submitTransaction(
+    documentReference,
+    Map<String, dynamic> transaction,
+  ) async {
+    documentReference.collection('transactions').add(transaction).then((_) {
+      print("collection created");
+    }).catchError((_) {
+      print("an error occured");
+    });
+  }
 }
