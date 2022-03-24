@@ -28,7 +28,7 @@ class SetupPageState extends State<SetupPage> {
   final categoryInputController = TextEditingController();
   List<TextEditingController> controllers = [];
   List<TextField> fields = [];
-  Map<String, int> finalCategoryMap = {};
+  List<Map<String, dynamic>> finalCategoryList = [];
 
   @override
   void initState() {
@@ -70,7 +70,8 @@ class SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    DocumentReference userDirectory =
+        FirebaseFirestore.instance.collection('users').doc(user!.uid);
     final TextEditingController budgetInputController = TextEditingController();
     PageController pageController = PageController(
       initialPage: 0,
@@ -189,15 +190,22 @@ class SetupPageState extends State<SetupPage> {
       onPressed: () async {
         if (pageController.page == 0) {
           await FirebaseInteractions.updateIncome(
-              users, user!.uid, int.parse(budgetInputController.text.trim()));
+              userDirectory, int.parse(budgetInputController.text.trim()));
           await pageController.nextPage(
               duration: Duration(milliseconds: 200), curve: Curves.easeIn);
         } else {
           for (int i = 0; i < categoryList!.length; i++) {
-            finalCategoryMap[categoryList![i]] = controllers[i].text.isEmpty ? 0 : int.parse(controllers[i].text);
+            Map<String, dynamic> tempMap = {
+              "name": categoryList![i],
+              "amount": controllers[i].text.isEmpty
+                  ? 0
+                  : int.parse(controllers[i].text)
+            };
+            finalCategoryList.add(tempMap);
           }
-          print(finalCategoryMap.toString());
-          Navigator.popAndPushNamed(context, '/HomePage');
+          await FirebaseInteractions.updateCategories(
+                  userDirectory, finalCategoryList)
+              .then((value) => Navigator.popAndPushNamed(context, '/HomePage'));
         }
       },
     );
