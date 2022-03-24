@@ -2,6 +2,7 @@ import 'package:budgetapp/authentication/authentication_service.dart';
 import 'package:budgetapp/screens/home/home_view.dart';
 import 'package:budgetapp/screens/login/login_view.dart';
 import 'package:budgetapp/screens/login/signup_view.dart';
+import 'package:budgetapp/screens/setIncome/set_income_page.dart';
 import 'package:budgetapp/screens/setup/setup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
                 SignUpPage.routeName: (context) => SignUpPage(),
                 HomePage.routeName: (context) => HomePage(),
                 SetupPage.routeName: (context) => SetupPage(),
+                SetIncomePage.routeName: (context) => SetIncomePage(),
               });
         },
       ),

@@ -34,4 +34,14 @@ class FirebaseInteractions {
       print("an error occured");
     });
   }
+
+  static Future<int?> getIncome(documentReference) async {
+    await documentReference.get().then((val) {
+      print(val.data()['income']);
+      return val.data()['income'];
+    }).catchError((_) {
+      print("an error occured");
+      return -1;
+    });
+  }
 }

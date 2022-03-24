@@ -3,6 +3,7 @@ import 'package:budgetapp/components/standard_alert.dart';
 import 'package:budgetapp/firebase_interactions/firebase_interactions.dart';
 import 'package:budgetapp/screens/home/home_view.dart';
 import 'package:budgetapp/screens/login/login_view.dart';
+import 'package:budgetapp/screens/setIncome/set_income_page.dart';
 import 'package:budgetapp/screens/setup/setup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -247,6 +248,12 @@ class HomePageState extends State<HomePage> {
                                 addTransactionDialog();
                               },
                               child: Text("Add transaction")),
+                          TextButton(
+                              onPressed: () async {
+                                Navigator.pushNamed(
+                                    context, SetIncomePage.routeName);
+                              },
+                              child: Text("Change income")),
                         ],
                       ),
                       Text(user!.email.toString()),
@@ -254,7 +261,8 @@ class HomePageState extends State<HomePage> {
                         stream: userTransactionsRef
                             ?.where("datetime",
                                 isGreaterThanOrEqualTo: startDate)
-                            .where("datetime", isLessThanOrEqualTo: endDate).orderBy("datetime")
+                            .where("datetime", isLessThanOrEqualTo: endDate)
+                            .orderBy("datetime")
                             .snapshots(),
                         builder:
                             (context, AsyncSnapshot<QuerySnapshot> snapshot) {
