@@ -33,7 +33,7 @@ class HomePageState extends State<HomePage> {
   double totalMonthlyBudget = 0;
   double totalMonthlySpend = 0;
 
-    List<String> months = [
+  List<String> months = [
     'January',
     'February',
     'March',
@@ -46,7 +46,7 @@ class HomePageState extends State<HomePage> {
     'October',
     'November',
     'December'
-  ]; 
+  ];
 
   @override
   void initState() {
@@ -135,7 +135,7 @@ class HomePageState extends State<HomePage> {
                       ),
                       TextFormField(
                         onChanged: (value) {
-                          if (amountController.text.isNotEmpty) {
+                          if (amountController.text.isNotEmpty && selectedCategory != null) {
                             setState(() {
                               allowTransactionSubmit = true;
                             });
@@ -195,6 +195,10 @@ class HomePageState extends State<HomePage> {
             );
           });
         }).then((value) {
+          setState(() {
+                  totalMonthlySpend += double.parse(amountController.text);
+          });
+
       descriptionController.clear();
       amountController.clear();
     });
@@ -296,20 +300,28 @@ class HomePageState extends State<HomePage> {
                       ),
                       Text(user!.email.toString()),
                       SizedBox(
-                        height: height!*0.02,
+                        height: height! * 0.02,
                       ),
                       //TOTAL SPEND
-                      Text('Expenditure for ${months[startDate.month -1]}', style: TextStyle(
-                        fontSize: 18,
-                        color: ColorTheme().gradientPurple,),),
-                             SizedBox(
-                        height: height!*0.01,
+                      Text(
+                        'Expenditure for ${months[startDate.month - 1]}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ColorTheme().gradientPurple,
+                        ),
                       ),
-                      Text('\$${totalMonthlySpend}0 / \$${totalMonthlyBudget}0', style: TextStyle(
-                        fontSize: 23,
-                        color: ColorTheme().gradientGreen,),),
-                             SizedBox(
-                        height: height!*0.01,
+                      SizedBox(
+                        height: height! * 0.01,
+                      ),
+                      Text(
+                        '\$${totalMonthlySpend}0 / \$${totalMonthlyBudget}0',
+                        style: TextStyle(
+                          fontSize: 23,
+                          color: ColorTheme().gradientGreen,
+                        ),
+                      ),
+                      SizedBox(
+                        height: height! * 0.01,
                       ),
                       StreamBuilder(
                         stream: userTransactionsRef
