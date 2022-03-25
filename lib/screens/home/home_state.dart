@@ -30,6 +30,23 @@ class HomePageState extends State<HomePage> {
   final startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   final endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   String? selectedCategory;
+  double totalMonthlyBudget = 0;
+  double totalMonthlySpend = 0;
+
+    List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]; 
 
   @override
   void initState() {
@@ -57,6 +74,10 @@ class HomePageState extends State<HomePage> {
     categories = querySnapshot.docs.map((doc) => doc.data() as Map).toList();
     categories.forEach((element) {
       categoryList.add(element['name']);
+      setState(() {
+        totalMonthlyBudget += element['amount'];
+      });
+      print(totalMonthlyBudget);
     });
 
     querySnapshot = await userTransactionsRef!
@@ -64,6 +85,12 @@ class HomePageState extends State<HomePage> {
         .where("datetime", isLessThanOrEqualTo: endDate)
         .get();
     transactions = querySnapshot.docs.map((doc) => doc.data() as Map).toList();
+    transactions.forEach((element) {
+      setState(() {
+        totalMonthlySpend += element['amount'];
+      });
+      print(totalMonthlySpend);
+    });
 
     print('Categories: ${categories}');
     print('Categories: ${categoryList}');
@@ -268,6 +295,22 @@ class HomePageState extends State<HomePage> {
                         ],
                       ),
                       Text(user!.email.toString()),
+                      SizedBox(
+                        height: height!*0.02,
+                      ),
+                      //TOTAL SPEND
+                      Text('Expenditure for ${months[startDate.month -1]}', style: TextStyle(
+                        fontSize: 18,
+                        color: ColorTheme().gradientPurple,),),
+                             SizedBox(
+                        height: height!*0.01,
+                      ),
+                      Text('\$${totalMonthlySpend}0 / \$${totalMonthlyBudget}0', style: TextStyle(
+                        fontSize: 23,
+                        color: ColorTheme().gradientGreen,),),
+                             SizedBox(
+                        height: height!*0.01,
+                      ),
                       StreamBuilder(
                         stream: userTransactionsRef
                             ?.where("datetime",
