@@ -3,6 +3,7 @@ import 'package:budgetapp/components/standard_alert.dart';
 import 'package:budgetapp/firebase_interactions/firebase_interactions.dart';
 import 'package:budgetapp/screens/home/home_view.dart';
 import 'package:budgetapp/screens/login/login_view.dart';
+import 'package:budgetapp/screens/setCategory/set_category_page.dart';
 import 'package:budgetapp/screens/setIncome/set_income_page.dart';
 import 'package:budgetapp/screens/setup/setup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -229,31 +230,41 @@ class HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                                onPressed: () async {
+                                  await FirebaseAuth.instance.signOut();
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            LoginPage(),
+                                      ),
+                                      (route) => false);
+                                },
+                                child: Text("Logout")),
+                            TextButton(
+                                onPressed: () async {
+                                  addTransactionDialog();
+                                },
+                                child: Text("Add transaction")),
+                          ]),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton(
-                              onPressed: () async {
-                                await FirebaseAuth.instance.signOut();
-                                Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          LoginPage(),
-                                    ),
-                                    (route) => false);
-                              },
-                              child: Text("Logout")),
-                          TextButton(
-                              onPressed: () async {
-                                addTransactionDialog();
-                              },
-                              child: Text("Add transaction")),
                           TextButton(
                               onPressed: () async {
                                 Navigator.pushNamed(
                                     context, SetIncomePage.routeName);
                               },
                               child: Text("Change income")),
+                          TextButton(
+                              onPressed: () async {
+                                Navigator.pushNamed(
+                                    context, SetCategoryPage.routeName);
+                              },
+                              child: Text("Change categories")),
                         ],
                       ),
                       Text(user!.email.toString()),

@@ -10,6 +10,20 @@ class FirebaseInteractions {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
+  static Future<void> deleteCategories(documentReference) async {
+    final collection =
+        await documentReference.collection("category_and_budget").get();
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (final doc in collection.docs) {
+      batch.delete(doc.reference);
+    }
+    print('deleted');
+    return batch.commit();
+
+  }
+
   static Future<void> updateCategories(
       documentReference, List<Map<String, dynamic>> categorylist) async {
     for (int i = 0; i < categorylist.length; i++) {

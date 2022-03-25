@@ -174,7 +174,7 @@ class SetupPageState extends State<SetupPage> {
 
     Widget nextButton = ElevatedButton(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(width! * 0.2, 10, height! * 0.3, 10),
+               padding: EdgeInsets.fromLTRB(width! * 0.3, 15, width! * 0.3, 15),
         child: const Text(
           'Next',
           style: TextStyle(fontSize: 17, color: Colors.white),
