@@ -9,6 +9,7 @@ import 'package:budgetapp/screens/setup/setup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -30,8 +31,10 @@ class HomePageState extends State<HomePage> {
   final startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   final endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   String? selectedCategory;
+  bool transactionSubmitted = false;
   double totalMonthlyBudget = 0;
   double totalMonthlySpend = 0;
+  int? income;
 
   List<String> months = [
     'January',
@@ -61,6 +64,12 @@ class HomePageState extends State<HomePage> {
     // Get docs from collection reference
     userDocument =
         FirebaseFirestore.instance.collection('users').doc(user!.uid);
+    userDocument!.get().then((documentSnapshot) => {
+          setState(() {
+            income = documentSnapshot.get('income');
+            print('income: ${income}');
+          })
+        });
     userCategoryRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
@@ -79,6 +88,7 @@ class HomePageState extends State<HomePage> {
       });
       print(totalMonthlyBudget);
     });
+    categoryList.add('Others');
 
     querySnapshot = await userTransactionsRef!
         .where("datetime", isGreaterThanOrEqualTo: startDate)
@@ -122,6 +132,16 @@ class HomePageState extends State<HomePage> {
                             : Text(
                                 selectedCategory!), // Not necessary for Option 1
                         onChanged: (value) {
+                          if (amountController.text.isNotEmpty &&
+                              selectedCategory != null) {
+                            setState(() {
+                              allowTransactionSubmit = true;
+                            });
+                          } else {
+                            setState(() {
+                              allowTransactionSubmit = false;
+                            });
+                          }
                           setState(() {
                             selectedCategory = value as String?;
                           });
@@ -135,7 +155,8 @@ class HomePageState extends State<HomePage> {
                       ),
                       TextFormField(
                         onChanged: (value) {
-                          if (amountController.text.isNotEmpty && selectedCategory != null) {
+                          if (amountController.text.isNotEmpty &&
+                              selectedCategory != null) {
                             setState(() {
                               allowTransactionSubmit = true;
                             });
@@ -178,6 +199,7 @@ class HomePageState extends State<HomePage> {
                               FirebaseInteractions.submitTransaction(
                                   userDocument, tempMap);
                               setState(() {
+                                transactionSubmitted = true;
                                 selectedCategory = null;
                               });
                               Navigator.pop(context);
@@ -195,13 +217,55 @@ class HomePageState extends State<HomePage> {
             );
           });
         }).then((value) {
-          setState(() {
-                  totalMonthlySpend += double.parse(amountController.text);
-          });
+      if (transactionSubmitted) {
+        setState(() {
+          totalMonthlySpend += double.parse(amountController.text);
+          transactionSubmitted = false;
+        });
+      }
 
       descriptionController.clear();
       amountController.clear();
     });
+  }
+
+  void showTransactionDetailsDialog(amount, datetime, category, description) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              insetPadding: EdgeInsets.all(width! * 0.05),
+              contentPadding: EdgeInsets.zero,
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16))),
+              elevation: 10,
+              content: Container(
+                  padding: const EdgeInsets.all(15),
+                  height: height! * 0.3,
+                  width: width! * 0.6,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '\$${amount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                            color: ColorTheme().gradientGrey, fontSize: 20),
+                      ),
+                      Text(
+                        'Spend on',
+                        style: TextStyle(
+                            color: ColorTheme().gradientGrey, fontSize: 20),
+                      ),
+                      Text(
+                        DateFormat.MMMMEEEEd().format(datetime.toDate()),
+                        style: TextStyle(
+                            color: ColorTheme().gradientGrey, fontSize: 20),
+                      ),
+                      Text(description == "" ? "No description" : description),
+                    ],
+                  )));
+        });
   }
 
   @override
@@ -302,6 +366,13 @@ class HomePageState extends State<HomePage> {
                       SizedBox(
                         height: height! * 0.02,
                       ),
+                      Text(
+                        'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ColorTheme().gradientGreen,
+                        ),
+                      ),
                       //TOTAL SPEND
                       Text(
                         'Expenditure for ${months[startDate.month - 1]}',
@@ -314,7 +385,7 @@ class HomePageState extends State<HomePage> {
                         height: height! * 0.01,
                       ),
                       Text(
-                        '\$${totalMonthlySpend}0 / \$${totalMonthlyBudget}0',
+                        '\$${totalMonthlySpend.toStringAsFixed(2)} / \$${totalMonthlyBudget.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 23,
                           color: ColorTheme().gradientGreen,
@@ -323,12 +394,23 @@ class HomePageState extends State<HomePage> {
                       SizedBox(
                         height: height! * 0.01,
                       ),
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 0, 10),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'All transactions for ${months[startDate.month - 1]}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: ColorTheme().gradientGreen,
+                          ),
+                        ),
+                      ),
                       StreamBuilder(
                         stream: userTransactionsRef
                             ?.where("datetime",
                                 isGreaterThanOrEqualTo: startDate)
                             .where("datetime", isLessThanOrEqualTo: endDate)
-                            .orderBy("datetime")
+                            .orderBy("datetime", descending: true)
                             .snapshots(),
                         builder:
                             (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -342,15 +424,41 @@ class HomePageState extends State<HomePage> {
                                   return Center(
                                     child: Card(
                                       child: ListTile(
+                                        onTap: (() {
+                                          showTransactionDetailsDialog(
+                                              transactions['amount'],
+                                              transactions['datetime'],
+                                              transactions['category'],
+                                              transactions['description']);
+                                        }),
                                         title: Text(
-                                          '\$${transactions['amount']}',
+                                          '\$${transactions['amount'].toStringAsFixed(2)}',
                                           maxLines: 1,
                                         ),
                                         subtitle: Text(
                                           transactions['category'],
                                           maxLines: 1,
                                         ),
-                                        // trailing: Text(transactions['datetime']., maxLines: 1,),
+                                        trailing: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              DateFormat.MMMMEEEEd().format(
+                                                  transactions['datetime']
+                                                      .toDate()),
+                                              maxLines: 1,
+                                            ),
+                                            Text(
+                                              DateFormat.jm().format(
+                                                  transactions['datetime']
+                                                      .toDate()),
+                                              maxLines: 1,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
