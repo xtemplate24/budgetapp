@@ -347,7 +347,7 @@ class HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        margin: EdgeInsets.only(top:height! * 0.05),
+                        margin: EdgeInsets.only(top: height! * 0.05),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -392,7 +392,9 @@ class HomePageState extends State<HomePage> {
                         height: height! * 0.02,
                       ),
                       Text(
-                        'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
+                        startDate.month == DateTime.now().month
+                            ? 'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
+                            : 'Savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 18,
                           color: ColorTheme().gradientGreen,
@@ -439,7 +441,8 @@ class HomePageState extends State<HomePage> {
                           ),
                           IconButton(
                               onPressed: () {
-                                if (startDate.month == DateTime.now().month && startDate.year == DateTime.now().year) {
+                                if (startDate.month == DateTime.now().month &&
+                                    startDate.year == DateTime.now().year) {
                                   return null;
                                 } else {
                                   changeMonth(false);
@@ -471,6 +474,8 @@ class HomePageState extends State<HomePage> {
                                     snapshot.data!.docs.map((transactions) {
                                   return Center(
                                     child: Card(
+                                      margin:
+                                          EdgeInsets.fromLTRB(10, 0, 10, 10),
                                       child: ListTile(
                                         onTap: (() {
                                           showTransactionDetailsDialog(
