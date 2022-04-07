@@ -28,8 +28,8 @@ class HomePageState extends State<HomePage> {
   final TextEditingController amountController = TextEditingController();
   bool allowTransactionSubmit = false;
 
-  final startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  final endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
+  DateTime startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  DateTime endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   String? selectedCategory;
   bool transactionSubmitted = false;
   double totalMonthlyBudget = 0;
@@ -58,9 +58,23 @@ class HomePageState extends State<HomePage> {
     width = 100.w;
   }
 
-  void allowSubmission() {}
+  void changeMonth(decrease_month) {
+    if (decrease_month) {
+      setState(() {
+        startDate = DateTime(startDate.year, startDate.month - 1, 1);
+        endDate = DateTime(endDate.year, endDate.month, 0);
+      });
+    } else {
+      setState(() {
+        startDate = DateTime(startDate.year, startDate.month + 1, 1);
+        endDate = DateTime(endDate.year, endDate.month + 2, 0);
+      });
+    }
+    totalMonthlySpend = 0;
+    getTransactions();
+  }
 
-  Future<void> getCategoriesAndTransactions() async {
+  Future<void> getCategories() async {
     // Get docs from collection reference
     userDocument =
         FirebaseFirestore.instance.collection('users').doc(user!.uid);
@@ -74,10 +88,6 @@ class HomePageState extends State<HomePage> {
         .collection('users')
         .doc(user!.uid)
         .collection("category_and_budget");
-    userTransactionsRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection("transactions");
 
     QuerySnapshot querySnapshot = await userCategoryRef!.get();
     categories = querySnapshot.docs.map((doc) => doc.data() as Map).toList();
@@ -89,6 +99,19 @@ class HomePageState extends State<HomePage> {
       print(totalMonthlyBudget);
     });
     categoryList.add('Others');
+
+    print('Categories: ${categories}');
+    print('Categories: ${categoryList}');
+  }
+
+  Future<void> getTransactions() async {
+    // Get docs from collection reference
+    userTransactionsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection("transactions");
+
+    QuerySnapshot querySnapshot = await userCategoryRef!.get();
 
     querySnapshot = await userTransactionsRef!
         .where("datetime", isGreaterThanOrEqualTo: startDate)
@@ -102,8 +125,6 @@ class HomePageState extends State<HomePage> {
       print(totalMonthlySpend);
     });
 
-    print('Categories: ${categories}');
-    print('Categories: ${categoryList}');
     print('Transactions: ${transactions}');
   }
 
@@ -223,7 +244,10 @@ class HomePageState extends State<HomePage> {
           transactionSubmitted = false;
         });
       }
-
+      setState(() {
+        selectedCategory = null;
+        allowTransactionSubmit = false;
+      });
       descriptionController.clear();
       amountController.clear();
     });
@@ -271,7 +295,8 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     if (!dataRetrieved) {
-      getCategoriesAndTransactions();
+      getCategories();
+      getTransactions();
       print('Start date: ${startDate.day}');
       print('End date: ${endDate.day}');
       setState(() {
@@ -317,34 +342,34 @@ class HomePageState extends State<HomePage> {
                 return false;
               },
               child: Scaffold(
-                appBar: AppBar(
-                  title: const Text("Home page"),
-                ),
                 body: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(
-                                onPressed: () async {
-                                  await FirebaseAuth.instance.signOut();
-                                  Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) =>
-                                            LoginPage(),
-                                      ),
-                                      (route) => false);
-                                },
-                                child: Text("Logout")),
-                            TextButton(
-                                onPressed: () async {
-                                  addTransactionDialog();
-                                },
-                                child: Text("Add transaction")),
-                          ]),
+                      Container(
+                        margin: EdgeInsets.only(top:height! * 0.05),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                  onPressed: () async {
+                                    await FirebaseAuth.instance.signOut();
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              LoginPage(),
+                                        ),
+                                        (route) => false);
+                                  },
+                                  child: Text("Logout")),
+                              TextButton(
+                                  onPressed: () async {
+                                    addTransactionDialog();
+                                  },
+                                  child: Text("Add transaction")),
+                            ]),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -394,16 +419,39 @@ class HomePageState extends State<HomePage> {
                       SizedBox(
                         height: height! * 0.01,
                       ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 0, 10),
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'All transactions for ${months[startDate.month - 1]}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: ColorTheme().gradientGreen,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                changeMonth(true);
+                              },
+                              icon: Icon(Icons.arrow_back_ios_rounded)),
+                          Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'All transactions for ${months[startDate.month - 1]}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: ColorTheme().gradientGreen,
+                              ),
+                            ),
                           ),
-                        ),
+                          IconButton(
+                              onPressed: () {
+                                if (startDate.month == DateTime.now().month && startDate.year == DateTime.now().year) {
+                                  return null;
+                                } else {
+                                  changeMonth(false);
+                                }
+                              },
+                              icon: Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: startDate.month == DateTime.now().month
+                                    ? Colors.grey
+                                    : Colors.black,
+                              )),
+                        ],
                       ),
                       StreamBuilder(
                         stream: userTransactionsRef
@@ -476,7 +524,7 @@ class HomePageState extends State<HomePage> {
           } else {
             return Scaffold(
               body: Center(
-                child: SpinKitPianoWave(color: ColorTheme().gradientPurple),
+                child: SpinKitThreeBounce(color: ColorTheme().gradientPurple),
               ),
             );
           }
