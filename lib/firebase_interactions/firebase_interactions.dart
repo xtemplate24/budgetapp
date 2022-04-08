@@ -55,4 +55,14 @@ class FirebaseInteractions {
       return -1;
     });
   }
+
+  static Future<bool?> deleteTransaction(collectionReference, doc_id) async {
+    await collectionReference.doc(doc_id).delete().then((val) {
+      print("deleted");
+      return true;
+    }).catchError((_) {
+      print("an error occured");
+      return false;
+    });
+  }
 }

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class HomePageState extends State<HomePage> {
   bool dataRetrieved = false;
@@ -37,6 +38,7 @@ class HomePageState extends State<HomePage> {
   int? income;
   double gradient = 0.1;
   double opacity = 0.5;
+  bool transactionsLoaded = false;
 
   List<String> months = [
     'January',
@@ -131,7 +133,8 @@ class HomePageState extends State<HomePage> {
           totalMonthlySpend += element['amount'];
           gradient = (totalMonthlySpend / totalMonthlyBudget) * 0.4 + 0.1;
           opacity = (totalMonthlySpend / totalMonthlyBudget) * 0.5 + 0.5;
-          print("LOOOKKK");
+          transactionsLoaded = true;
+
           print(gradient);
           print(opacity);
         });
@@ -140,6 +143,25 @@ class HomePageState extends State<HomePage> {
     }
 
     print('Transactions: ${transactions}');
+  }
+
+  void deleteTransactionDialog(collectionReference, doc_id) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialogTwoOptions(
+              title: "Delete transaction",
+              content: "Are you sure you want to delete this transaction?",
+              buttonTextA: "Cancel",
+              buttonTextB: "Banish it",
+              context: context);
+        }).then((value) {
+      if (value == 1) {
+        FirebaseInteractions.deleteTransaction(collectionReference, doc_id);
+            totalMonthlySpend = 0;
+        getTransactions();
+      }
+    });
   }
 
   void addTransactionDialog() {
@@ -356,19 +378,21 @@ class HomePageState extends State<HomePage> {
                 return false;
               },
               child: Scaffold(
-                body: Container(
+                body: AnimatedContainer(
+                  curve: Curves.fastOutSlowIn,
+                  duration: Duration(seconds: 2),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          stops: [
-                            gradient,
-                            0.9
-                          ],
-                          colors: [
-                            ColorTheme().backgroundPurple.withOpacity(opacity),
-                            ColorTheme().backgroundGreen
-                          ])),
+                      gradient:
+                          LinearGradient(begin: Alignment.bottomCenter, stops: [
+gradient,
+                        0.9
+                      ], colors: [
+                        ColorTheme()
+                            .backgroundPurple
+                            .withOpacity(opacity),
+                        ColorTheme().backgroundGreen
+                      ])),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -493,67 +517,72 @@ class HomePageState extends State<HomePage> {
                           builder:
                               (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (!snapshot.hasData) {
-                              return const Text('Loading...');
+                              return Container(
+                                  height: height! * 0.5,
+                                  child: Center(
+                                    child: SpinKitFadingCircle(
+                                        color: Colors.white),
+                                  ));
                             } else {
                               return Container(
                                 height: height! * 0.5,
-                                child: Expanded(
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children:
-                                        snapshot.data!.docs.map((transactions) {
-                                      return Center(
-                                        child: Card(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          elevation: 0,
-                                          color:
-                                              Color.fromARGB(57, 255, 255, 255),
-                                          margin: EdgeInsets.fromLTRB(
-                                              10, 0, 10, 10),
-                                          child: ListTile(
-                                            onTap: (() {
-                                              showTransactionDetailsDialog(
-                                                  transactions['amount'],
-                                                  transactions['datetime'],
-                                                  transactions['category'],
-                                                  transactions['description']);
-                                            }),
-                                            title: Text(
-                                              '\$${transactions['amount'].toStringAsFixed(2)}',
-                                              maxLines: 1,
-                                            ),
-                                            subtitle: Text(
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  children:
+                                      snapshot.data!.docs.map((transactions) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      elevation: 0,
+                                      color: Color.fromARGB(57, 255, 255, 255),
+                                      margin:
+                                          EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                      child: ListTile(
+                                        onLongPress: ((() {
+                                          deleteTransactionDialog(
+                                              userTransactionsRef,
+                                              transactions.id);
+                                        })),
+                                        onTap: (() {
+                                          showTransactionDetailsDialog(
+                                              transactions['amount'],
+                                              transactions['datetime'],
                                               transactions['category'],
+                                              transactions['description']);
+                                        }),
+                                        title: Text(
+                                          '\$${transactions['amount'].toStringAsFixed(2)}',
+                                          maxLines: 1,
+                                        ),
+                                        subtitle: Text(
+                                          transactions['category'],
+                                          maxLines: 1,
+                                        ),
+                                        trailing: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              DateFormat.MMMMEEEEd().format(
+                                                  transactions['datetime']
+                                                      .toDate()),
                                               maxLines: 1,
                                             ),
-                                            trailing: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  DateFormat.MMMMEEEEd().format(
-                                                      transactions['datetime']
-                                                          .toDate()),
-                                                  maxLines: 1,
-                                                ),
-                                                Text(
-                                                  DateFormat.jm().format(
-                                                      transactions['datetime']
-                                                          .toDate()),
-                                                  maxLines: 1,
-                                                ),
-                                              ],
+                                            Text(
+                                              DateFormat.jm().format(
+                                                  transactions['datetime']
+                                                      .toDate()),
+                                              maxLines: 1,
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                      );
-                                    }).toList(),
-                                  ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               );
                             }
@@ -567,8 +596,20 @@ class HomePageState extends State<HomePage> {
             );
           } else {
             return Scaffold(
-              body: Center(
-                child: SpinKitThreeBounce(color: ColorTheme().gradientPurple),
+              body: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        stops: [
+                          0.1,
+                          0.9
+                        ],
+                        colors: [
+                          ColorTheme().backgroundPurple.withOpacity(0.5),
+                          ColorTheme().backgroundGreen
+                        ])),
+                child: Center(),
               ),
             );
           }
