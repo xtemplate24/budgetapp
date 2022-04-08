@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HomePageState extends State<HomePage> {
   bool dataRetrieved = false;
@@ -158,7 +159,7 @@ class HomePageState extends State<HomePage> {
         }).then((value) {
       if (value == 1) {
         FirebaseInteractions.deleteTransaction(collectionReference, doc_id);
-            totalMonthlySpend = 0;
+        totalMonthlySpend = 0;
         getTransactions();
       }
     });
@@ -383,16 +384,16 @@ class HomePageState extends State<HomePage> {
                   duration: Duration(seconds: 2),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      gradient:
-                          LinearGradient(begin: Alignment.bottomCenter, stops: [
-gradient,
-                        0.9
-                      ], colors: [
-                        ColorTheme()
-                            .backgroundPurple
-                            .withOpacity(opacity),
-                        ColorTheme().backgroundGreen
-                      ])),
+                      gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          stops: [
+                            gradient,
+                            0.9
+                          ],
+                          colors: [
+                            ColorTheme().backgroundPurple.withOpacity(opacity),
+                            ColorTheme().backgroundGreen
+                          ])),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -438,39 +439,100 @@ gradient,
                                 child: Text("Change categories")),
                           ],
                         ),
-                        Text(user!.email.toString()),
                         SizedBox(
                           height: height! * 0.02,
                         ),
+                        Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            elevation: 0,
+                            color: Color.fromARGB(57, 255, 255, 255),
+                            margin: EdgeInsets.fromLTRB(15, 0, 15, 10),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: width! * 0.9,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Expenditure',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18,
+                                        color: ColorTheme().gradientPurple,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.fromLTRB(
+                                        0, 0, 0, height! * 0.01),
+                                    width: width! * 0.95,
+                                    child: SfLinearGauge(
+                                        minimum: 0,
+                                        maximum: totalMonthlyBudget,
+                                        showLabels: false,
+                                        showTicks: false,
+                                        axisTrackStyle: LinearAxisTrackStyle(
+                                            thickness: 15,
+                                            edgeStyle:
+                                                LinearEdgeStyle.bothCurve),
+                                        barPointers: [
+                                          LinearBarPointer(
+                                              color:
+                                                  ColorTheme().gradientPurple,
+                                              value: totalMonthlySpend,
+                                              // Changed the thickness to make the curve visible
+                                              thickness: 15,
+                                              //Updated the edge style as curve at end position
+                                              edgeStyle:
+                                                  LinearEdgeStyle.bothCurve)
+                                        ],
+                                        markerPointers: [
+                                          LinearWidgetPointer(
+                                              value: totalMonthlySpend,
+                                              offset: 10,
+                                              position:
+                                                  LinearElementPosition.inside,
+                                              child: Card(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                elevation: 0,
+                                                color: Color.fromARGB(
+                                                    100, 255, 255, 255),
+                                                margin: EdgeInsets.fromLTRB(
+                                                    15, 0, 15, 0),
+                                                child: Container(
+                                                  padding: EdgeInsets.all(5),
+                                                  child: Text(
+                                                      '\$${totalMonthlySpend.toStringAsFixed(2)}'),
+                                                ),
+                                              )),
+                                          LinearWidgetPointer(
+                                            value: totalMonthlyBudget,
+                                            offset: 10,
+                                            position:
+                                                LinearElementPosition.outside,
+                                            child: Text(
+                                                '\$${totalMonthlyBudget.toStringAsFixed(2)}'),
+                                          ),
+                                        ]),
+                                  ),
+                                ],
+                              ),
+                            )),
                         Text(
                           startDate.month == DateTime.now().month
-                              ? 'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
-                              : 'Savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
+                              ? 'Potential savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
+                              : 'Savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: 18,
                             color: ColorTheme().gradientGreen,
                           ),
-                        ),
-                        //TOTAL SPEND
-                        Text(
-                          'Expenditure for ${months[startDate.month - 1]}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: ColorTheme().gradientPurple,
-                          ),
-                        ),
-                        SizedBox(
-                          height: height! * 0.01,
-                        ),
-                        Text(
-                          '\$${totalMonthlySpend.toStringAsFixed(2)} / \$${totalMonthlyBudget.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 23,
-                            color: ColorTheme().gradientGreen,
-                          ),
-                        ),
-                        SizedBox(
-                          height: height! * 0.01,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -538,7 +600,7 @@ gradient,
                                       elevation: 0,
                                       color: Color.fromARGB(57, 255, 255, 255),
                                       margin:
-                                          EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                          EdgeInsets.fromLTRB(15, 0, 15, 10),
                                       child: ListTile(
                                         onLongPress: ((() {
                                           deleteTransactionDialog(
@@ -555,6 +617,8 @@ gradient,
                                         title: Text(
                                           '\$${transactions['amount'].toStringAsFixed(2)}',
                                           maxLines: 1,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w600),
                                         ),
                                         subtitle: Text(
                                           transactions['category'],

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,10 +42,12 @@ class MyApp extends StatelessWidget {
       child: Sizer(
         builder: (context, orientation, deviceType) {
           return MaterialApp(
-              title: "Flutter Demo",
+              title: "Budget App",
               theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                  visualDensity: VisualDensity.adaptivePlatformDensity),
+                primarySwatch: Colors.blue,
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+                textTheme: GoogleFonts.cabinTextTheme(),
+              ),
               home: AuthenticationWrapper(),
               routes: {
                 LoginPage.routeName: (context) => LoginPage(),
@@ -63,11 +66,8 @@ class MyApp extends StatelessWidget {
 class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({Key? key}) : super(key: key);
   @override
-
   Widget build(BuildContext context) {
     final firebaseuser = context.watch<User?>();
-    
-
 
     if (firebaseuser != null) {
       print("Email verified");
