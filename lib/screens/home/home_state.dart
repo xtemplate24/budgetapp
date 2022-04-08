@@ -35,6 +35,8 @@ class HomePageState extends State<HomePage> {
   double totalMonthlyBudget = 0;
   double totalMonthlySpend = 0;
   int? income;
+  double gradient = 0.1;
+  double opacity = 0.5;
 
   List<String> months = [
     'January',
@@ -118,12 +120,24 @@ class HomePageState extends State<HomePage> {
         .where("datetime", isLessThanOrEqualTo: endDate)
         .get();
     transactions = querySnapshot.docs.map((doc) => doc.data() as Map).toList();
-    transactions.forEach((element) {
+    if (transactions.isEmpty) {
       setState(() {
-        totalMonthlySpend += element['amount'];
+        gradient = 0.1;
+        opacity = 0.5;
       });
-      print(totalMonthlySpend);
-    });
+    } else {
+      transactions.forEach((element) {
+        setState(() {
+          totalMonthlySpend += element['amount'];
+          gradient = (totalMonthlySpend / totalMonthlyBudget) * 0.4 + 0.1;
+          opacity = (totalMonthlySpend / totalMonthlyBudget) * 0.5 + 0.5;
+          print("LOOOKKK");
+          print(gradient);
+          print(opacity);
+        });
+        print(totalMonthlySpend);
+      });
+    }
 
     print('Transactions: ${transactions}');
   }
@@ -277,7 +291,7 @@ class HomePageState extends State<HomePage> {
                             color: ColorTheme().gradientGrey, fontSize: 20),
                       ),
                       Text(
-                        'Spend on',
+                        'Spent on',
                         style: TextStyle(
                             color: ColorTheme().gradientGrey, fontSize: 20),
                       ),
@@ -342,186 +356,211 @@ class HomePageState extends State<HomePage> {
                 return false;
               },
               child: Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: height! * 0.05),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                  onPressed: () async {
-                                    await FirebaseAuth.instance.signOut();
-                                    Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              LoginPage(),
-                                        ),
-                                        (route) => false);
-                                  },
-                                  child: Text("Logout")),
-                              TextButton(
-                                  onPressed: () async {
-                                    addTransactionDialog();
-                                  },
-                                  child: Text("Add transaction")),
-                            ]),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                              onPressed: () async {
-                                Navigator.pushNamed(
-                                    context, SetIncomePage.routeName);
-                              },
-                              child: Text("Change income")),
-                          TextButton(
-                              onPressed: () async {
-                                Navigator.pushNamed(
-                                    context, SetCategoryPage.routeName);
-                              },
-                              child: Text("Change categories")),
-                        ],
-                      ),
-                      Text(user!.email.toString()),
-                      SizedBox(
-                        height: height! * 0.02,
-                      ),
-                      Text(
-                        startDate.month == DateTime.now().month
-                            ? 'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
-                            : 'Savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ColorTheme().gradientGreen,
+                body: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          stops: [
+                            gradient,
+                            0.9
+                          ],
+                          colors: [
+                            ColorTheme().backgroundPurple.withOpacity(opacity),
+                            ColorTheme().backgroundGreen
+                          ])),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: height! * 0.05),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                    onPressed: () async {
+                                      await FirebaseAuth.instance.signOut();
+                                      Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                LoginPage(),
+                                          ),
+                                          (route) => false);
+                                    },
+                                    child: Text("Logout")),
+                                TextButton(
+                                    onPressed: () async {
+                                      addTransactionDialog();
+                                    },
+                                    child: Text("Add transaction")),
+                              ]),
                         ),
-                      ),
-                      //TOTAL SPEND
-                      Text(
-                        'Expenditure for ${months[startDate.month - 1]}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ColorTheme().gradientPurple,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                                onPressed: () async {
+                                  Navigator.pushNamed(
+                                      context, SetIncomePage.routeName);
+                                },
+                                child: Text("Change income")),
+                            TextButton(
+                                onPressed: () async {
+                                  Navigator.pushNamed(
+                                      context, SetCategoryPage.routeName);
+                                },
+                                child: Text("Change categories")),
+                          ],
                         ),
-                      ),
-                      SizedBox(
-                        height: height! * 0.01,
-                      ),
-                      Text(
-                        '\$${totalMonthlySpend.toStringAsFixed(2)} / \$${totalMonthlyBudget.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 23,
-                          color: ColorTheme().gradientGreen,
+                        Text(user!.email.toString()),
+                        SizedBox(
+                          height: height! * 0.02,
                         ),
-                      ),
-                      SizedBox(
-                        height: height! * 0.01,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                changeMonth(true);
-                              },
-                              icon: Icon(Icons.arrow_back_ios_rounded)),
-                          Container(
-                            alignment: Alignment.center,
-                            child: Text(
-                              'All transactions for ${months[startDate.month - 1]}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: ColorTheme().gradientGreen,
+                        Text(
+                          startDate.month == DateTime.now().month
+                              ? 'Potential savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
+                              : 'Savings: ${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: ColorTheme().gradientGreen,
+                          ),
+                        ),
+                        //TOTAL SPEND
+                        Text(
+                          'Expenditure for ${months[startDate.month - 1]}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: ColorTheme().gradientPurple,
+                          ),
+                        ),
+                        SizedBox(
+                          height: height! * 0.01,
+                        ),
+                        Text(
+                          '\$${totalMonthlySpend.toStringAsFixed(2)} / \$${totalMonthlyBudget.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 23,
+                            color: ColorTheme().gradientGreen,
+                          ),
+                        ),
+                        SizedBox(
+                          height: height! * 0.01,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  changeMonth(true);
+                                },
+                                icon: Icon(Icons.arrow_back_ios_rounded)),
+                            Container(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'All transactions for ${months[startDate.month - 1]}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: ColorTheme().gradientGreen,
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                              onPressed: () {
-                                if (startDate.month == DateTime.now().month &&
-                                    startDate.year == DateTime.now().year) {
-                                  return null;
-                                } else {
-                                  changeMonth(false);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: startDate.month == DateTime.now().month
-                                    ? Colors.grey
-                                    : Colors.black,
-                              )),
-                        ],
-                      ),
-                      StreamBuilder(
-                        stream: userTransactionsRef
-                            ?.where("datetime",
-                                isGreaterThanOrEqualTo: startDate)
-                            .where("datetime", isLessThanOrEqualTo: endDate)
-                            .orderBy("datetime", descending: true)
-                            .snapshots(),
-                        builder:
-                            (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Text('Loading...');
-                          } else {
-                            return Expanded(
-                              child: ListView(
-                                children:
-                                    snapshot.data!.docs.map((transactions) {
-                                  return Center(
-                                    child: Card(
-                                      margin:
-                                          EdgeInsets.fromLTRB(10, 0, 10, 10),
-                                      child: ListTile(
-                                        onTap: (() {
-                                          showTransactionDetailsDialog(
-                                              transactions['amount'],
-                                              transactions['datetime'],
+                            IconButton(
+                                onPressed: () {
+                                  if (startDate.month == DateTime.now().month &&
+                                      startDate.year == DateTime.now().year) {
+                                    return null;
+                                  } else {
+                                    changeMonth(false);
+                                  }
+                                },
+                                icon: Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: startDate.month == DateTime.now().month
+                                      ? Colors.grey
+                                      : Colors.black,
+                                )),
+                          ],
+                        ),
+                        StreamBuilder(
+                          stream: userTransactionsRef
+                              ?.where("datetime",
+                                  isGreaterThanOrEqualTo: startDate)
+                              .where("datetime", isLessThanOrEqualTo: endDate)
+                              .orderBy("datetime", descending: true)
+                              .snapshots(),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Text('Loading...');
+                            } else {
+                              return Container(
+                                height: height! * 0.5,
+                                child: Expanded(
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    children:
+                                        snapshot.data!.docs.map((transactions) {
+                                      return Center(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          elevation: 0,
+                                          color:
+                                              Color.fromARGB(57, 255, 255, 255),
+                                          margin: EdgeInsets.fromLTRB(
+                                              10, 0, 10, 10),
+                                          child: ListTile(
+                                            onTap: (() {
+                                              showTransactionDetailsDialog(
+                                                  transactions['amount'],
+                                                  transactions['datetime'],
+                                                  transactions['category'],
+                                                  transactions['description']);
+                                            }),
+                                            title: Text(
+                                              '\$${transactions['amount'].toStringAsFixed(2)}',
+                                              maxLines: 1,
+                                            ),
+                                            subtitle: Text(
                                               transactions['category'],
-                                              transactions['description']);
-                                        }),
-                                        title: Text(
-                                          '\$${transactions['amount'].toStringAsFixed(2)}',
-                                          maxLines: 1,
-                                        ),
-                                        subtitle: Text(
-                                          transactions['category'],
-                                          maxLines: 1,
-                                        ),
-                                        trailing: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              DateFormat.MMMMEEEEd().format(
-                                                  transactions['datetime']
-                                                      .toDate()),
                                               maxLines: 1,
                                             ),
-                                            Text(
-                                              DateFormat.jm().format(
-                                                  transactions['datetime']
-                                                      .toDate()),
-                                              maxLines: 1,
+                                            trailing: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  DateFormat.MMMMEEEEd().format(
+                                                      transactions['datetime']
+                                                          .toDate()),
+                                                  maxLines: 1,
+                                                ),
+                                                Text(
+                                                  DateFormat.jm().format(
+                                                      transactions['datetime']
+                                                          .toDate()),
+                                                  maxLines: 1,
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

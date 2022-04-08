@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseInteractions {
@@ -21,7 +19,6 @@ class FirebaseInteractions {
     }
     print('deleted');
     return batch.commit();
-
   }
 
   static Future<void> updateCategories(
