@@ -190,8 +190,8 @@ class HomePageState extends State<HomePage> {
                             : Text(
                                 selectedCategory!), // Not necessary for Option 1
                         onChanged: (value) {
-                          if (amountController.text.isNotEmpty &&
-                              selectedCategory != null) {
+                          print('ok');
+                          if (amountController.text.isNotEmpty) {
                             setState(() {
                               allowTransactionSubmit = true;
                             });

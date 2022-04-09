@@ -139,8 +139,9 @@ class SetCategoryPageState extends State<SetCategoryPage> {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text("Setup page"),
+        title: const Text("Set category page"),
       ),
       body: Container(
         child: Column(
@@ -198,8 +199,11 @@ class SetCategoryPageState extends State<SetCategoryPage> {
                         ),
                         ElevatedButton(
                             onPressed: () {
-                              addToList(categoryInputController.text, false, 0);
-                              categoryInputController.clear();
+                              if (categoryInputController.text.isNotEmpty) {
+                                addToList(
+                                    categoryInputController.text, false, 0);
+                                categoryInputController.clear();
+                              }
                             },
                             child: Text("Add")),
                       ],
