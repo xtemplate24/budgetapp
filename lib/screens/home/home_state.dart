@@ -57,6 +57,12 @@ class HomePageState extends State<HomePage> {
   Map spendingByCategory = {};
   Map budgetByCategory = {};
   Map percentageSpendByCategory = {};
+  List<String> options = [
+    'Item1',
+    'Item2',
+    'Item3',
+    'Item4',
+  ];
 
   List<ChartData> chartData = <ChartData>[];
   late TooltipBehavior _tooltipBehavior;
@@ -77,8 +83,20 @@ class HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _tooltipBehavior =
-        TooltipBehavior(enable: true, tooltipPosition: TooltipPosition.pointer);
+    _tooltipBehavior = TooltipBehavior(
+      enable: true,
+      color: Color.fromARGB(100, 255, 255, 255),
+      opacity: 0.7,
+      builder: (dynamic data, dynamic point, dynamic series, int pointIndex,
+          int seriesIndex) {
+        return Container(
+            padding: EdgeInsets.all(5),
+            color: Color.fromARGB(100, 255, 255, 255),
+            child: Text(
+                '${categoryList[seriesIndex]} : \$${spendingByCategory[categoryList[seriesIndex]].toStringAsFixed(2)} / \$${budgetByCategory[categoryList[seriesIndex]].toStringAsFixed(2)}'));
+      },
+      // tooltipPosition: TooltipPosition.pointer,
+    );
     super.initState();
     height = 100.h;
     width = 100.w;
@@ -172,16 +190,18 @@ class HomePageState extends State<HomePage> {
   }
 
   void populateChart() {
-    chartData = [];
     int x = 0;
-    spendingByCategory.forEach((key, value) {
-      chartData.add(ChartData(key,
-          spendingByCategory[key] / budgetByCategory[key], chartColors[x]));
-      if (x == 7) {
-        x = 0;
-      } else {
-        x += 1;
-      }
+    setState(() {
+      chartData = [];
+      spendingByCategory.forEach((key, value) {
+        double temp_num = spendingByCategory[key] / budgetByCategory[key];
+        chartData.add(ChartData(key, temp_num, chartColors[x]));
+        if (x == 7) {
+          x = 0;
+        } else {
+          x += 1;
+        }
+      });
     });
   }
 
@@ -331,45 +351,6 @@ class HomePageState extends State<HomePage> {
       descriptionController.clear();
       amountController.clear();
     });
-  }
-
-  void showTransactionDetailsDialog(amount, datetime, category, description) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-              insetPadding: EdgeInsets.all(width! * 0.05),
-              contentPadding: EdgeInsets.zero,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(16))),
-              elevation: 10,
-              content: Container(
-                  padding: const EdgeInsets.all(15),
-                  height: height! * 0.3,
-                  width: width! * 0.6,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        '\$${amount.toStringAsFixed(2)}',
-                        style: TextStyle(
-                            color: ColorTheme().gradientGrey, fontSize: 20),
-                      ),
-                      Text(
-                        'Spent on',
-                        style: TextStyle(
-                            color: ColorTheme().gradientGrey, fontSize: 20),
-                      ),
-                      Text(
-                        DateFormat.MMMMEEEEd().format(datetime.toDate()),
-                        style: TextStyle(
-                            color: ColorTheme().gradientGrey, fontSize: 20),
-                      ),
-                      Text(description == "" ? "No description" : description),
-                    ],
-                  )));
-        });
   }
 
   Future<void> getCategoriesThenTransactions() async {
@@ -534,7 +515,7 @@ class HomePageState extends State<HomePage> {
                                           edgeStyle: LinearEdgeStyle.bothCurve),
                                       barPointers: [
                                         LinearBarPointer(
-                                            color: ColorTheme().gradientPurple,
+                                            color: ColorTheme().chart1,
                                             value: totalMonthlySpend,
                                             // Changed the thickness to make the curve visible
                                             thickness: 15,
@@ -607,6 +588,7 @@ class HomePageState extends State<HomePage> {
                                                       String>(
                                                   maximumValue: 1,
                                                   radius: '100%',
+                                                  trackOpacity: 0.7,
                                                   gap: '3%',
                                                   dataSource: chartData,
                                                   cornerStyle: charts
@@ -622,12 +604,13 @@ class HomePageState extends State<HomePage> {
                                                           data.color)
                                             ],
                                             legend: Legend(
-                                                textStyle: GoogleFonts.cabin(),
-                                                isVisible: true,
-                                                // Overflowing legend content will be wraped
-                                                overflowMode:
-                                                    LegendItemOverflowMode
-                                                        .wrap),
+                                              iconHeight: 30,
+                                              textStyle: GoogleFonts.cabin(),
+                                              isVisible: true,
+                                              // Overflowing legend content will be wraped
+                                              overflowMode:
+                                                  LegendItemOverflowMode.wrap,
+                                            ),
                                           )),
                                     ],
                                   ),
@@ -708,47 +691,68 @@ class HomePageState extends State<HomePage> {
                                       color: Color.fromARGB(57, 255, 255, 255),
                                       margin:
                                           EdgeInsets.fromLTRB(15, 0, 15, 10),
-                                      child: ListTile(
-                                        onLongPress: ((() {
-                                          deleteTransactionDialog(
-                                              userTransactionsRef,
-                                              transactions.id);
-                                        })),
-                                        onTap: (() {
-                                          showTransactionDetailsDialog(
-                                              transactions['amount'],
-                                              transactions['datetime'],
+                                      child: Theme(
+                                        data: Theme.of(context).copyWith(
+                                            splashColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            dividerColor: Colors.transparent,
+                                            unselectedWidgetColor:
+                                                ColorTheme().gradientGrey,
+                                            colorScheme: ColorScheme.light(
+                                              primary:
+                                                  ColorTheme().gradientGreen,
+                                            )),
+                                        child: CustomExpansionTile(
+                                          trailing: Icon(
+                                            Icons.arrow_drop_down_rounded,
+                                            size: 0,
+                                          ),
+                                          tilePadding: EdgeInsets.all(0),
+                                          title: ListTile(
+                                            contentPadding: EdgeInsets.fromLTRB(
+                                                30, 0, 0, 0),
+                                            title: Text(
+                                              '\$${transactions['amount'].toStringAsFixed(2)}',
+                                              maxLines: 1,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                            subtitle: Text(
                                               transactions['category'],
-                                              transactions['description']);
-                                        }),
-                                        title: Text(
-                                          '\$${transactions['amount'].toStringAsFixed(2)}',
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                        subtitle: Text(
-                                          transactions['category'],
-                                          maxLines: 1,
-                                        ),
-                                        trailing: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
+                                              maxLines: 1,
+                                            ),
+                                            trailing: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  DateFormat.MMMMEEEEd().format(
+                                                      transactions['datetime']
+                                                          .toDate()),
+                                                  maxLines: 1,
+                                                ),
+                                                Text(
+                                                  DateFormat.jm().format(
+                                                      transactions['datetime']
+                                                          .toDate()),
+                                                  maxLines: 1,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                           children: [
-                                            Text(
-                                              DateFormat.MMMMEEEEd().format(
-                                                  transactions['datetime']
-                                                      .toDate()),
-                                              maxLines: 1,
-                                            ),
-                                            Text(
-                                              DateFormat.jm().format(
-                                                  transactions['datetime']
-                                                      .toDate()),
-                                              maxLines: 1,
-                                            ),
+                                            Container(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    30, 0, 0, 20),
+                                                alignment: Alignment.centerLeft,
+                                                child: transactions[
+                                                            'description'] ==
+                                                        ""
+                                                    ? Text("No description")
+                                                    : Text(transactions[
+                                                        'description']))
                                           ],
                                         ),
                                       ),

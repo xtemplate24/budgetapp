@@ -8,6 +8,8 @@ class ColorTheme {
   final Color backgroundGreen = const Color(0xffA9F1DF);
   final Color backgroundGrey = const Color(0xffdcd4cc);
 
+  final Color darkGrey = Color.fromARGB(255, 46, 46, 46); 
+
   //color for chart
   final Color chart1 = const Color(0xff7eb8da);
   final Color chart2 = const Color(0xff792ddea);
