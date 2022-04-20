@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:budgetapp/components/color_theme.dart';
 import 'package:budgetapp/components/custom_expansion_tile.dart';
 import 'package:budgetapp/components/standard_alert.dart';
@@ -205,7 +207,7 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  void deleteTransactionDialog(collectionReference, doc_id) {
+  Future<bool> deleteTransactionDialog(collectionReference, doc_id) async {
     showDialog(
         context: context,
         builder: (context) {
@@ -222,118 +224,126 @@ class HomePageState extends State<HomePage> {
         await getTransactions().then((value) {
           populateChart();
         });
-        ;
+        return true;
+      } else {
+        return false;
       }
     });
+    return false;
   }
 
   void addTransactionDialog() {
     showDialog(
+       barrierColor: Color.fromARGB(12, 0, 0, 0),
         context: context,
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              insetPadding: EdgeInsets.all(width! * 0.05),
-              contentPadding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(16))),
-              elevation: 10,
-              content: Container(
-                  padding: EdgeInsets.all(15),
-                  height: height! * 0.5,
-                  width: width! * 0.8,
-                  child: Column(
-                    children: [
-                      Text("Add a new transaction"),
-                      DropdownButton(
-                        hint: selectedCategory == null
-                            ? Text('Select a category')
-                            : Text(
-                                selectedCategory!), // Not necessary for Option 1
-                        onChanged: (value) {
-                          print('ok');
-                          if (amountController.text.isNotEmpty) {
-                            setState(() {
-                              allowTransactionSubmit = true;
-                            });
-                          } else {
-                            setState(() {
-                              allowTransactionSubmit = false;
-                            });
-                          }
-                          setState(() {
-                            selectedCategory = value as String?;
-                          });
-                        },
-                        items: categoryList.map((category) {
-                          return DropdownMenuItem(
-                            child: Text(category),
-                            value: category,
-                          );
-                        }).toList(),
-                      ),
-                      TextFormField(
-                        onChanged: (value) {
-                          if (amountController.text.isNotEmpty &&
-                              selectedCategory != null) {
-                            setState(() {
-                              allowTransactionSubmit = true;
-                            });
-                          } else {
-                            setState(() {
-                              allowTransactionSubmit = false;
-                            });
-                          }
-                        },
-                        keyboardType: TextInputType.number,
-                        controller: amountController,
-                        decoration: const InputDecoration(labelText: "Amount"),
-                      ),
-                      TextFormField(
-                        controller: descriptionController,
-                        decoration:
-                            const InputDecoration(labelText: "Description"),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            primary: !allowTransactionSubmit
-                                ? Colors.grey
-                                : ColorTheme().gradientGreen,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 5.0,
-                          ),
-                          onPressed: () {
-                            if (allowTransactionSubmit) {
-                              Map<String, dynamic> tempMap = {
-                                "amount": double.parse(amountController.text),
-                                "category": selectedCategory,
-                                "description":
-                                    descriptionController.text.isEmpty
-                                        ? ""
-                                        : descriptionController.text,
-                                "datetime": DateTime.now(),
-                              };
-                              FirebaseInteractions.submitTransaction(
-                                  userDocument, tempMap);
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
+              child: AlertDialog(
+                backgroundColor: Colors.white.withOpacity(0.9),
+                insetPadding: EdgeInsets.all(width! * 0.05),
+                contentPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                elevation: 10,
+                content: Container(
+                    padding: EdgeInsets.all(15),
+                    height: height! * 0.5,
+                    width: width! * 0.8,
+                    child: Column(
+                      children: [
+                        Text("Add a new transaction"),
+                        DropdownButton(
+                          hint: selectedCategory == null
+                              ? Text('Select a category')
+                              : Text(
+                                  selectedCategory!), // Not necessary for Option 1
+                          onChanged: (value) {
+                            print('ok');
+                            if (amountController.text.isNotEmpty) {
                               setState(() {
-                                transactionSubmitted = true;
-                                selectedCategory = null;
+                                allowTransactionSubmit = true;
                               });
-                              Navigator.pop(context);
                             } else {
-                              const snackBar = SnackBar(
-                                content: Text('Please enter an amount'),
-                              );
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
+                              setState(() {
+                                allowTransactionSubmit = false;
+                              });
+                            }
+                            setState(() {
+                              selectedCategory = value as String?;
+                            });
+                          },
+                          items: categoryList.map((category) {
+                            return DropdownMenuItem(
+                              child: Text(category),
+                              value: category,
+                            );
+                          }).toList(),
+                        ),
+                        TextFormField(
+                          onChanged: (value) {
+                            if (amountController.text.isNotEmpty &&
+                                selectedCategory != null) {
+                              setState(() {
+                                allowTransactionSubmit = true;
+                              });
+                            } else {
+                              setState(() {
+                                allowTransactionSubmit = false;
+                              });
                             }
                           },
-                          child: Text("Submit"))
-                    ],
-                  )),
+                          keyboardType: TextInputType.number,
+                          controller: amountController,
+                          decoration: const InputDecoration(labelText: "Amount"),
+                        ),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration:
+                              const InputDecoration(labelText: "Description"),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: !allowTransactionSubmit
+                                  ? Colors.grey
+                                  : ColorTheme().gradientGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation: 5.0,
+                            ),
+                            onPressed: () {
+                              if (allowTransactionSubmit) {
+                                Map<String, dynamic> tempMap = {
+                                  "amount": double.parse(amountController.text),
+                                  "category": selectedCategory,
+                                  "description":
+                                      descriptionController.text.isEmpty
+                                          ? ""
+                                          : descriptionController.text,
+                                  "datetime": DateTime.now(),
+                                };
+                                FirebaseInteractions.submitTransaction(
+                                    userDocument, tempMap);
+                                setState(() {
+                                  transactionSubmitted = true;
+                                  selectedCategory = null;
+                                });
+                                Navigator.pop(context);
+                              } else {
+                                const snackBar = SnackBar(
+                                  content: Text('Please enter an amount'),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              }
+                            },
+                            child: Text("Submit"))
+                      ],
+                    )),
+              ),
             );
           });
         }).then((value) {
@@ -344,10 +354,10 @@ class HomePageState extends State<HomePage> {
         });
         populateChart();
       }
-      setState(() {
+
         selectedCategory = null;
         allowTransactionSubmit = false;
-      });
+
       descriptionController.clear();
       amountController.clear();
     });
@@ -679,81 +689,103 @@ class HomePageState extends State<HomePage> {
                               return Expanded(
                                 //height: height! * 0.5,
                                 child: ListView(
+                                  padding: EdgeInsets.only(top: 10),
                                   shrinkWrap: true,
                                   children:
                                       snapshot.data!.docs.map((transactions) {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      elevation: 0,
-                                      color: Color.fromARGB(57, 255, 255, 255),
-                                      margin:
-                                          EdgeInsets.fromLTRB(15, 0, 15, 10),
-                                      child: Theme(
-                                        data: Theme.of(context).copyWith(
-                                            splashColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            dividerColor: Colors.transparent,
-                                            unselectedWidgetColor:
-                                                ColorTheme().gradientGrey,
-                                            colorScheme: ColorScheme.light(
-                                              primary:
-                                                  ColorTheme().gradientGreen,
-                                            )),
-                                        child: CustomExpansionTile(
-                                          trailing: Icon(
-                                            Icons.arrow_drop_down_rounded,
-                                            size: 0,
-                                          ),
-                                          tilePadding: EdgeInsets.all(0),
-                                          title: ListTile(
-                                            contentPadding: EdgeInsets.fromLTRB(
-                                                30, 0, 0, 0),
-                                            title: Text(
-                                              '\$${transactions['amount'].toStringAsFixed(2)}',
-                                              maxLines: 1,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w600),
+                                    return Dismissible(
+                                      key: UniqueKey(),
+                                      confirmDismiss: (val) async {
+                                        return await deleteTransactionDialog(
+                                            userTransactionsRef,
+                                            transactions.id);
+                                      },
+                                      direction: DismissDirection.endToStart,
+                                      background: Container(
+                                          alignment: Alignment.centerRight,
+                                          padding:
+                                              EdgeInsets.fromLTRB(0, 0, 30, 10),
+                                          child: Icon(
+                                              Icons.delete_outline_rounded,
+                                              color:
+                                                  ColorTheme().gradientPurple)),
+                                      child: Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        elevation: 0,
+                                        color:
+                                            Color.fromARGB(57, 255, 255, 255),
+                                        margin:
+                                            EdgeInsets.fromLTRB(15, 0, 15, 10),
+                                        child: Theme(
+                                          data: Theme.of(context).copyWith(
+                                              splashColor: Colors.transparent,
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              dividerColor: Colors.transparent,
+                                              unselectedWidgetColor:
+                                                  ColorTheme().gradientGrey,
+                                              colorScheme: ColorScheme.light(
+                                                primary:
+                                                    ColorTheme().gradientGreen,
+                                              )),
+                                          child: CustomExpansionTile(
+                                            trailing: Icon(
+                                              Icons.arrow_drop_down_rounded,
+                                              size: 0,
                                             ),
-                                            subtitle: Text(
-                                              transactions['category'],
-                                              maxLines: 1,
+                                            tilePadding: EdgeInsets.all(0),
+                                            title: ListTile(
+                                              contentPadding:
+                                                  EdgeInsets.fromLTRB(
+                                                      30, 0, 0, 0),
+                                              title: Text(
+                                                '\$${transactions['amount'].toStringAsFixed(2)}',
+                                                maxLines: 1,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                              subtitle: Text(
+                                                transactions['category'],
+                                                maxLines: 1,
+                                              ),
+                                              trailing: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    DateFormat.MMMMd().format(
+                                                        transactions['datetime']
+                                                            .toDate()),
+                                                    maxLines: 1,
+                                                  ),
+                                                  Text(
+                                                    DateFormat.jm().format(
+                                                        transactions['datetime']
+                                                            .toDate()),
+                                                    maxLines: 1,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            trailing: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  DateFormat.MMMMEEEEd().format(
-                                                      transactions['datetime']
-                                                          .toDate()),
-                                                  maxLines: 1,
-                                                ),
-                                                Text(
-                                                  DateFormat.jm().format(
-                                                      transactions['datetime']
-                                                          .toDate()),
-                                                  maxLines: 1,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          children: [
-                                            Container(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    30, 0, 0, 20),
+                                            children: [
+                                              Container(
                                                 alignment: Alignment.centerLeft,
-                                                child: transactions[
-                                                            'description'] ==
-                                                        ""
-                                                    ? Text("No description")
-                                                    : Text(transactions[
-                                                        'description']))
-                                          ],
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      30, 0, 30, 20),
+                                                  child: transactions[
+                                                              'description'] ==
+                                                          ""
+                                                      ? Text("No description")
+                                                      : Text(transactions[
+                                                          'description'])),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     );
