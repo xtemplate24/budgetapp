@@ -7,5 +7,14 @@ class ColorTheme {
   final Color backgroundPurple = const Color(0xffFFBBBB);
   final Color backgroundGreen = const Color(0xffA9F1DF);
   final Color backgroundGrey = const Color(0xffdcd4cc);
-  
+
+  //color for chart
+  final Color chart1 = const Color(0xff7eb8da);
+  final Color chart2 = const Color(0xff792ddea);
+  final Color chart3 = const Color(0xffffa5d8);
+  final Color chart4 = const Color(0xffbe9ddf);
+  final Color chart6 = const Color(0xffcc70a3);
+  final Color chart7 = const Color(0xffd7a9bd);
+  final Color chart8 = const Color(0xffcdd2e6);
+  final Color chart5 = const Color(0xff9579d1);
 }
