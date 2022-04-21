@@ -9,6 +9,7 @@ class ColorTheme {
   final Color backgroundGrey = const Color(0xffdcd4cc);
 
   final Color darkGrey = Color.fromARGB(255, 46, 46, 46); 
+  final Color buttonGreen = Color.fromARGB(255, 48, 155, 114); 
 
   //color for chart
   final Color chart1 = const Color(0xff7eb8da);

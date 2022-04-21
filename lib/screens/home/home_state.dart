@@ -21,6 +21,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as charts;
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 
 class HomePageState extends State<HomePage> {
   bool dataRetrieved = false;
@@ -233,9 +234,50 @@ class HomePageState extends State<HomePage> {
     return false;
   }
 
-  void addTransactionDialog() {
-    showDialog(
+  void optionsDialog() {
+    showAnimatedDialog(
+        context: context,
+        barrierDismissible: true,
         barrierColor: Color.fromARGB(12, 0, 0, 0),
+        animationType: DialogTransitionType.slideFromRight,
+        curve: Curves.fastOutSlowIn,
+        duration: Duration(milliseconds: 400),
+        builder: (context) {
+          return Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, height! * 0.07, 15, 20),
+                child: BlurryContainer(
+                    blur: 5,
+                    bgColor: Colors.white,
+                    padding: EdgeInsets.all(10),
+                    height: 125,
+                    width: 200,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
+                      TextButton(
+                          onPressed: () async {
+                            Navigator.pushNamed(
+                                context, SetIncomePage.routeName);
+                          },
+                          child: Text("Change income")),
+                      TextButton(
+                          onPressed: () async {
+                            Navigator.pushNamed(
+                                context, SetCategoryPage.routeName);
+                          },
+                          child: Text("Change categories")),
+                    ])),
+              ));
+        });
+  }
+
+  void addTransactionDialog() {
+    showAnimatedDialog(
+        barrierDismissible: true,
+        barrierColor: Color.fromARGB(12, 0, 0, 0),
+        animationType: DialogTransitionType.slideFromBottom,
+        curve: Curves.fastOutSlowIn,
+        duration: Duration(milliseconds: 400),
         context: context,
         builder: (context) {
           return StatefulBuilder(
@@ -298,7 +340,6 @@ class HomePageState extends State<HomePage> {
                         ),
                       ),
                       TextFormField(
-                        
                         onChanged: (value) {
                           if (amountController.text.isNotEmpty &&
                               selectedCategory != null) {
@@ -321,15 +362,15 @@ class HomePageState extends State<HomePage> {
                             const InputDecoration(labelText: "Description"),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top:20),
+                        margin: EdgeInsets.only(top: 20),
                         child: ElevatedButton(
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(
                                   width! * 0.2, 15, width! * 0.2, 15),
                               child: const Text(
                                 'Add',
-                                style:
-                                    TextStyle(fontSize: 17, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 17, color: Colors.white),
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -366,7 +407,6 @@ class HomePageState extends State<HomePage> {
                               }
                             }),
                       ),
-                     
                     ],
                   )),
             );
@@ -450,7 +490,7 @@ class HomePageState extends State<HomePage> {
                       addTransactionDialog();
                     },
                     elevation: 3,
-                    backgroundColor: ColorTheme().gradientPurple,
+                    backgroundColor: ColorTheme().chart1,
                     child: Icon(
                       Icons.add_box_rounded,
                     ),
@@ -476,11 +516,11 @@ class HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
-                          margin: EdgeInsets.only(top: height! * 0.05),
+                          padding: EdgeInsets.all(10),
                           child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextButton(
+                                IconButton(
                                     onPressed: () async {
                                       await FirebaseAuth.instance.signOut();
                                       Navigator.pushAndRemoveUntil(
@@ -491,28 +531,19 @@ class HomePageState extends State<HomePage> {
                                           ),
                                           (route) => false);
                                     },
-                                    child: Text("Logout")),
+                                    icon: Icon(
+                                      Icons.logout_rounded,
+                                      color: ColorTheme().gradientGreen,
+                                    )),
+                                IconButton(
+                                    onPressed: () {
+                                      optionsDialog();
+                                    },
+                                    icon: Icon(
+                                      Icons.settings_rounded,
+                                      color: ColorTheme().gradientGreen,
+                                    ))
                               ]),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(
-                                onPressed: () async {
-                                  Navigator.pushNamed(
-                                      context, SetIncomePage.routeName);
-                                },
-                                child: Text("Change income")),
-                            TextButton(
-                                onPressed: () async {
-                                  Navigator.pushNamed(
-                                      context, SetCategoryPage.routeName);
-                                },
-                                child: Text("Change categories")),
-                          ],
-                        ),
-                        SizedBox(
-                          height: height! * 0.02,
                         ),
                         Card(
                           shape: RoundedRectangleBorder(
@@ -526,6 +557,7 @@ class HomePageState extends State<HomePage> {
                             child: Column(
                               children: [
                                 Container(
+                                  padding: EdgeInsets.only(left: 10),
                                   width: width! * 0.9,
                                   alignment: Alignment.centerLeft,
                                   child: Text(
@@ -538,6 +570,7 @@ class HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Container(
+                                  padding: EdgeInsets.only(left: 10),
                                   margin: EdgeInsets.all(0),
                                   width: width! * 0.95,
                                   child: SfLinearGauge(
@@ -602,13 +635,16 @@ class HomePageState extends State<HomePage> {
                                       )),
                                   child: CustomExpansionTile(
                                     tilePadding: EdgeInsets.all(0),
-                                    title: Text(
-                                      startDate.month == DateTime.now().month
-                                          ? 'Potential savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
-                                          : 'Savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: ColorTheme().gradientGreen,
+                                    title: Container(
+                                      padding: EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        startDate.month == DateTime.now().month
+                                            ? 'Potential savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}'
+                                            : 'Savings: \$${income == null ? "Loading" : (income! - totalMonthlySpend).toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: ColorTheme().gradientGreen,
+                                        ),
                                       ),
                                     ),
                                     children: [
@@ -677,6 +713,7 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                             IconButton(
+                              padding: EdgeInsets.only(right:5),
                                 onPressed: () {
                                   if (startDate.month == DateTime.now().month &&
                                       startDate.year == DateTime.now().year) {

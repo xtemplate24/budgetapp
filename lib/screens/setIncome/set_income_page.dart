@@ -55,16 +55,16 @@ class SetIncomePageState extends State<SetIncomePage> {
       });
     }
 
-    Widget nextButton = ElevatedButton(
+    Widget nextButton =ElevatedButton(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(width! * 0.2, 10, height! * 0.3, 10),
+        padding: EdgeInsets.fromLTRB(width! * 0.3, 15, width! * 0.3, 15),
         child: const Text(
-          'Next',
+          'Save',
           style: TextStyle(fontSize: 17, color: Colors.white),
         ),
       ),
       style: ElevatedButton.styleFrom(
-        primary: ColorTheme().gradientPurple,
+        primary: ColorTheme().gradientGreen,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
         ),
@@ -77,7 +77,7 @@ class SetIncomePageState extends State<SetIncomePage> {
           Navigator.pop(context);
         });
       },
-    );
+    ); 
 
     return Scaffold(
       appBar: AppBar(
