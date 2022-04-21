@@ -6,6 +6,7 @@ import 'package:budgetapp/components/custom_expansion_tile.dart';
 import 'package:budgetapp/components/standard_alert.dart';
 import 'package:budgetapp/firebase_interactions/firebase_interactions.dart';
 import 'package:budgetapp/screens/home/home_view.dart';
+import 'package:budgetapp/screens/home/loading_home.dart';
 import 'package:budgetapp/screens/login/login_view.dart';
 import 'package:budgetapp/screens/setCategory/set_category_page.dart';
 import 'package:budgetapp/screens/setIncome/set_income_page.dart';
@@ -246,27 +247,29 @@ class HomePageState extends State<HomePage> {
           return Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, height! * 0.07, 15, 20),
+                padding: EdgeInsets.fromLTRB(20, height! * 0.09, 15, 20),
                 child: BlurryContainer(
                     blur: 5,
                     bgColor: Colors.white,
                     padding: EdgeInsets.all(10),
                     height: 125,
                     width: 200,
-                    child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
-                      TextButton(
-                          onPressed: () async {
-                            Navigator.pushNamed(
-                                context, SetIncomePage.routeName);
-                          },
-                          child: Text("Change income")),
-                      TextButton(
-                          onPressed: () async {
-                            Navigator.pushNamed(
-                                context, SetCategoryPage.routeName);
-                          },
-                          child: Text("Change categories")),
-                    ])),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                              onPressed: () async {
+                                Navigator.pushNamed(
+                                    context, SetIncomePage.routeName);
+                              },
+                              child: Text("Change income")),
+                          TextButton(
+                              onPressed: () async {
+                                Navigator.pushNamed(
+                                    context, SetCategoryPage.routeName);
+                              },
+                              child: Text("Change categories")),
+                        ])),
               ));
         });
   }
@@ -516,6 +519,7 @@ class HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
+                          margin: EdgeInsets.only(top: 20),
                           padding: EdgeInsets.all(10),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -557,7 +561,7 @@ class HomePageState extends State<HomePage> {
                             child: Column(
                               children: [
                                 Container(
-                                  padding: EdgeInsets.only(left: 10),
+                                  padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
                                   width: width! * 0.9,
                                   alignment: Alignment.centerLeft,
                                   child: Text(
@@ -713,7 +717,7 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                             IconButton(
-                              padding: EdgeInsets.only(right:5),
+                                padding: EdgeInsets.only(right: 5),
                                 onPressed: () {
                                   if (startDate.month == DateTime.now().month &&
                                       startDate.year == DateTime.now().year) {
@@ -865,23 +869,7 @@ class HomePageState extends State<HomePage> {
               ),
             );
           } else {
-            return Scaffold(
-              body: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        stops: [
-                          0.1,
-                          0.9
-                        ],
-                        colors: [
-                          ColorTheme().backgroundPurple.withOpacity(0.5),
-                          ColorTheme().backgroundGreen
-                        ])),
-                child: Center(),
-              ),
-            );
+            return LoadingHome().tempLoadingScreen();
           }
         });
   }
