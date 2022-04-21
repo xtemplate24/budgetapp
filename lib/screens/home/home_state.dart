@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:budgetapp/components/color_theme.dart';
 import 'package:budgetapp/components/custom_expansion_tile.dart';
 import 'package:budgetapp/components/standard_alert.dart';
@@ -234,28 +235,41 @@ class HomePageState extends State<HomePage> {
 
   void addTransactionDialog() {
     showDialog(
-       barrierColor: Color.fromARGB(12, 0, 0, 0),
+        barrierColor: Color.fromARGB(12, 0, 0, 0),
         context: context,
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-              child: AlertDialog(
-                backgroundColor: Colors.white.withOpacity(0.9),
-                insetPadding: EdgeInsets.all(width! * 0.05),
-                contentPadding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
-                elevation: 10,
-                content: Container(
-                    padding: EdgeInsets.all(15),
-                    height: height! * 0.5,
-                    width: width! * 0.8,
-                    child: Column(
-                      children: [
-                        Text("Add a new transaction"),
-                        DropdownButton(
+            return AlertDialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.all(width! * 0.05),
+              contentPadding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              elevation: 0,
+              content: BlurryContainer(
+                  blur: 5,
+                  bgColor: Colors.white,
+                  padding: EdgeInsets.all(40),
+                  height: height! * 0.5,
+                  width: width! * 0.8,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                          padding: EdgeInsets.all(0),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "New\nTransaction",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                color: ColorTheme().gradientGreen,
+                                fontSize: 30),
+                          )),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: DropdownButton(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
                           hint: selectedCategory == null
                               ? Text('Select a category')
                               : Text(
@@ -282,35 +296,46 @@ class HomePageState extends State<HomePage> {
                             );
                           }).toList(),
                         ),
-                        TextFormField(
-                          onChanged: (value) {
-                            if (amountController.text.isNotEmpty &&
-                                selectedCategory != null) {
-                              setState(() {
-                                allowTransactionSubmit = true;
-                              });
-                            } else {
-                              setState(() {
-                                allowTransactionSubmit = false;
-                              });
-                            }
-                          },
-                          keyboardType: TextInputType.number,
-                          controller: amountController,
-                          decoration: const InputDecoration(labelText: "Amount"),
-                        ),
-                        TextFormField(
-                          controller: descriptionController,
-                          decoration:
-                              const InputDecoration(labelText: "Description"),
-                        ),
-                        ElevatedButton(
+                      ),
+                      TextFormField(
+                        
+                        onChanged: (value) {
+                          if (amountController.text.isNotEmpty &&
+                              selectedCategory != null) {
+                            setState(() {
+                              allowTransactionSubmit = true;
+                            });
+                          } else {
+                            setState(() {
+                              allowTransactionSubmit = false;
+                            });
+                          }
+                        },
+                        keyboardType: TextInputType.number,
+                        controller: amountController,
+                        decoration: const InputDecoration(labelText: "Amount"),
+                      ),
+                      TextFormField(
+                        controller: descriptionController,
+                        decoration:
+                            const InputDecoration(labelText: "Description"),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top:20),
+                        child: ElevatedButton(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                  width! * 0.2, 15, width! * 0.2, 15),
+                              child: const Text(
+                                'Add',
+                                style:
+                                    TextStyle(fontSize: 17, color: Colors.white),
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              primary: !allowTransactionSubmit
-                                  ? Colors.grey
-                                  : ColorTheme().gradientGreen,
+                              primary: ColorTheme().gradientGreen,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(25),
                               ),
                               elevation: 5.0,
                             ),
@@ -339,11 +364,11 @@ class HomePageState extends State<HomePage> {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
                               }
-                            },
-                            child: Text("Submit"))
-                      ],
-                    )),
-              ),
+                            }),
+                      ),
+                     
+                    ],
+                  )),
             );
           });
         }).then((value) {
@@ -355,8 +380,8 @@ class HomePageState extends State<HomePage> {
         populateChart();
       }
 
-        selectedCategory = null;
-        allowTransactionSubmit = false;
+      selectedCategory = null;
+      allowTransactionSubmit = false;
 
       descriptionController.clear();
       amountController.clear();
@@ -775,7 +800,8 @@ class HomePageState extends State<HomePage> {
                                             ),
                                             children: [
                                               Container(
-                                                alignment: Alignment.centerLeft,
+                                                  alignment:
+                                                      Alignment.centerLeft,
                                                   padding: EdgeInsets.fromLTRB(
                                                       30, 0, 30, 20),
                                                   child: transactions[

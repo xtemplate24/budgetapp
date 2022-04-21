@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
               title: "Budget App",
               theme: ThemeData(
-                primarySwatch: Colors.blue,
+                primarySwatch: Colors.teal,
                 visualDensity: VisualDensity.adaptivePlatformDensity,
                 textTheme: GoogleFonts.cabinTextTheme(),
               ),

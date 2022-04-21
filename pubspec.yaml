@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.17.0
   google_fonts: ^2.3.1
   syncfusion_flutter_gauges: ^19.4.56
+  blurrycontainer: ^0.1.0
 
 dev_dependencies:
   flutter_test:
