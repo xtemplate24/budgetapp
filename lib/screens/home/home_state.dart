@@ -399,6 +399,18 @@ class HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+                      exchangeController.text.isNotEmpty &&
+                              amountController.text.isNotEmpty
+                          ? double.parse(exchangeController.text) != 1.0
+                              ? Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text("SGD " +
+                                      (double.parse(amountController.text) /
+                                              double.parse(
+                                                  exchangeController.text))
+                                          .toStringAsFixed(2),style: TextStyle(fontSize: 13),))
+                              : Container()
+                          : Container(),
                       TextFormField(
                         controller: descriptionController,
                         decoration:
@@ -431,7 +443,9 @@ class HomePageState extends State<HomePage> {
                                         .doc(user!.uid),
                                     double.parse(exchangeController.text));
                                 Map<String, dynamic> tempMap = {
-                                  "amount": double.parse(amountController.text) / double.parse(exchangeController.text),
+                                  "amount":
+                                      double.parse(amountController.text) /
+                                          double.parse(exchangeController.text),
                                   "category": selectedCategory,
                                   "description":
                                       descriptionController.text.isEmpty
@@ -462,7 +476,8 @@ class HomePageState extends State<HomePage> {
         }).then((value) {
       if (transactionSubmitted) {
         setState(() {
-          totalMonthlySpend += (double.parse(amountController.text) / double.parse(exchangeController.text));
+          totalMonthlySpend += (double.parse(amountController.text) /
+              double.parse(exchangeController.text));
           transactionSubmitted = false;
         });
         populateChart();
