@@ -8,6 +8,32 @@ class FirebaseInteractions {
         .catchError((error) => print("Failed to update user: $error"));
   }
 
+  static Future<void> updateExchangeRate(documentReference, rate) {
+    return documentReference
+        .update({'exchange_rate': rate})
+        .then((value) => print('updated'))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  static Future<double?> getExchangeRate(documentReference) async {
+    await documentReference.get().then((val) {
+      print('hi there');
+      double temp = val.data()['exchange_rate'];
+      if (temp == null) {
+        print('what');
+        return -1.0;
+      } else {
+        print('here');
+        print(temp);
+        return temp;
+      }
+    }).catchError((error) {
+      print("an error occured");
+      print(error);
+      return -1.0;
+    });
+  }
+
   static Future<void> deleteCategories(documentReference) async {
     final collection =
         await documentReference.collection("category_and_budget").get();

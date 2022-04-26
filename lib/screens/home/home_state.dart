@@ -37,6 +37,7 @@ class HomePageState extends State<HomePage> {
   CollectionReference? userTransactionsRef;
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+  final TextEditingController exchangeController = TextEditingController();
   bool allowTransactionSubmit = false;
   List<Color> chartColors = [
     ColorTheme().chart1,
@@ -52,6 +53,7 @@ class HomePageState extends State<HomePage> {
   DateTime startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   DateTime endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   String? selectedCategory;
+  double exchangeRate = 1;
   bool transactionSubmitted = false;
   double totalMonthlyBudget = 0;
   double totalMonthlySpend = 0;
@@ -181,8 +183,12 @@ class HomePageState extends State<HomePage> {
         setState(() {
           spendingByCategory[element['category']] += element['amount'];
           totalMonthlySpend += element['amount'];
-          gradient = (totalMonthlySpend / totalMonthlyBudget) * 0.4 + 0.1;
-          opacity = (totalMonthlySpend / totalMonthlyBudget) * 0.5 + 0.5;
+          double tempGradient =
+              (totalMonthlySpend / totalMonthlyBudget) * 0.4 + 0.1;
+          double tempOpacity =
+              opacity = (totalMonthlySpend / totalMonthlyBudget) * 0.5 + 0.5;
+          gradient = tempGradient > 0.5 ? 0.5 : tempGradient;
+          opacity = tempOpacity > 1 ? 1 : tempOpacity;
           transactionsLoaded = true;
         });
       });
@@ -280,7 +286,7 @@ class HomePageState extends State<HomePage> {
         barrierColor: Color.fromARGB(12, 0, 0, 0),
         animationType: DialogTransitionType.slideFromBottom,
         curve: Curves.fastOutSlowIn,
-        duration: Duration(milliseconds: 400),
+        duration: Duration(milliseconds: 450),
         context: context,
         builder: (context) {
           return StatefulBuilder(
@@ -321,7 +327,8 @@ class HomePageState extends State<HomePage> {
                                   selectedCategory!), // Not necessary for Option 1
                           onChanged: (value) {
                             print('ok');
-                            if (amountController.text.isNotEmpty) {
+                            if (amountController.text.isNotEmpty &&
+                                exchangeController.text.isNotEmpty) {
                               setState(() {
                                 allowTransactionSubmit = true;
                               });
@@ -342,22 +349,55 @@ class HomePageState extends State<HomePage> {
                           }).toList(),
                         ),
                       ),
-                      TextFormField(
-                        onChanged: (value) {
-                          if (amountController.text.isNotEmpty &&
-                              selectedCategory != null) {
-                            setState(() {
-                              allowTransactionSubmit = true;
-                            });
-                          } else {
-                            setState(() {
-                              allowTransactionSubmit = false;
-                            });
-                          }
-                        },
-                        keyboardType: TextInputType.number,
-                        controller: amountController,
-                        decoration: const InputDecoration(labelText: "Amount"),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: TextFormField(
+                              onChanged: (value) {
+                                if (amountController.text.isNotEmpty &&
+                                    exchangeController.text.isNotEmpty &&
+                                    selectedCategory != null) {
+                                  setState(() {
+                                    allowTransactionSubmit = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    allowTransactionSubmit = false;
+                                  });
+                                }
+                              },
+                              keyboardType: TextInputType.number,
+                              controller: amountController,
+                              decoration:
+                                  const InputDecoration(labelText: "Amount"),
+                            ),
+                          ),
+                          SizedBox(
+                            width: width! * 0.05,
+                          ),
+                          Flexible(
+                            child: TextFormField(
+                              onChanged: (value) {
+                                if (amountController.text.isNotEmpty &&
+                                    exchangeController.text.isNotEmpty &&
+                                    selectedCategory != null) {
+                                  setState(() {
+                                    allowTransactionSubmit = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    allowTransactionSubmit = false;
+                                  });
+                                }
+                              },
+                              keyboardType: TextInputType.number,
+                              controller: exchangeController,
+                              decoration: const InputDecoration(
+                                  labelText: "Exchange rate"),
+                            ),
+                          ),
+                        ],
                       ),
                       TextFormField(
                         controller: descriptionController,
@@ -385,8 +425,13 @@ class HomePageState extends State<HomePage> {
                             ),
                             onPressed: () {
                               if (allowTransactionSubmit) {
+                                FirebaseInteractions.updateExchangeRate(
+                                    FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(user!.uid),
+                                    double.parse(exchangeController.text));
                                 Map<String, dynamic> tempMap = {
-                                  "amount": double.parse(amountController.text),
+                                  "amount": double.parse(amountController.text) / double.parse(exchangeController.text),
                                   "category": selectedCategory,
                                   "description":
                                       descriptionController.text.isEmpty
@@ -417,7 +462,7 @@ class HomePageState extends State<HomePage> {
         }).then((value) {
       if (transactionSubmitted) {
         setState(() {
-          totalMonthlySpend += double.parse(amountController.text);
+          totalMonthlySpend += (double.parse(amountController.text) / double.parse(exchangeController.text));
           transactionSubmitted = false;
         });
         populateChart();
@@ -435,10 +480,35 @@ class HomePageState extends State<HomePage> {
     await getCategories().then((value) => getTransactions());
   }
 
+  Future<void> getExchangeRate() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get()
+        .then((val) {
+      double temp = val.data()!['exchange_rate'];
+      print(temp);
+      if (temp == null) {
+        FirebaseInteractions.updateExchangeRate(
+            FirebaseFirestore.instance.collection('users').doc(user!.uid), 1.0);
+      } else {
+        setState(() {
+          exchangeRate = temp;
+        });
+      }
+      exchangeController.text = exchangeRate.toString();
+    }).catchError((error) {
+      print("an error occured");
+      print(error);
+      return -1.0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!dataRetrieved) {
       getCategoriesThenTransactions();
+      getExchangeRate();
       print('Start date: ${startDate.day}');
       print('End date: ${endDate.day}');
       setState(() {
@@ -607,8 +677,12 @@ class HomePageState extends State<HomePage> {
                                                     BorderRadius.circular(10.0),
                                               ),
                                               elevation: 0,
-                                              color: Color.fromARGB(
-                                                  100, 255, 255, 255),
+                                              color: totalMonthlySpend >=
+                                                      totalMonthlyBudget
+                                                  ? Color.fromARGB(
+                                                      98, 255, 136, 136)
+                                                  : Color.fromARGB(
+                                                      100, 255, 255, 255),
                                               margin: EdgeInsets.fromLTRB(
                                                   15, 0, 15, 0),
                                               child: Container(
