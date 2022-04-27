@@ -45,7 +45,7 @@ class SetIncomePageState extends State<SetIncomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("in set income page");
+    print("in set income page hehe");
     DocumentReference userDirectory =
         FirebaseFirestore.instance.collection('users').doc(user!.uid);
     if (firstLaunch) {
