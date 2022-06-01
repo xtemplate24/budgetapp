@@ -555,7 +555,7 @@ class HomePageState extends State<HomePage> {
                 .then((_) {
               users.doc((user!.uid));
               print('Added');
-              return SetupPage();
+              Navigator.popAndPushNamed(context, SetupPage.routeName);
             }).catchError((error) {
               print('Add failed: $error');
               return HomePage();
