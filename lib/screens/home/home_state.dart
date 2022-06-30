@@ -404,11 +404,14 @@ class HomePageState extends State<HomePage> {
                           ? double.parse(exchangeController.text) != 1.0
                               ? Container(
                                   alignment: Alignment.centerLeft,
-                                  child: Text("SGD " +
-                                      (double.parse(amountController.text) /
-                                              double.parse(
-                                                  exchangeController.text))
-                                          .toStringAsFixed(2),style: TextStyle(fontSize: 13),))
+                                  child: Text(
+                                    "SGD " +
+                                        (double.parse(amountController.text) /
+                                                double.parse(
+                                                    exchangeController.text))
+                                            .toStringAsFixed(2),
+                                    style: TextStyle(fontSize: 13),
+                                  ))
                               : Container()
                           : Container(),
                       TextFormField(
@@ -776,6 +779,52 @@ class HomePageState extends State<HomePage> {
                                                   LegendItemOverflowMode.wrap,
                                             ),
                                           )),
+                                      // Container(
+                                      //     child:
+                                      //         startDate.month ==
+                                      //                 DateTime.now().month
+                                      //             ? Column(
+                                      //                 children: [
+                                      //                   Text(
+                                      //                     totalMonthlySpend /
+                                      //                                 totalMonthlyBudget >
+                                      //                             (startDate.day /
+                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
+                                      //                                         .day) *
+                                      //                                 totalMonthlyBudget
+                                      //                         ? "Spending rate optimal ${                 totalMonthlySpend /
+                                      //                                 totalMonthlyBudget >
+                                      //                             (startDate.day /
+                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
+                                      //                                         .day) *
+                                      //                                 totalMonthlyBudget}"
+                                      //                         : 'Spending rate not optimal ${                 totalMonthlySpend /
+                                      //                                 totalMonthlyBudget >
+                                      //                             (startDate.day /
+                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
+                                      //                                         .day) *
+                                      //                                 totalMonthlyBudget}',
+                                      //                     style: TextStyle(
+                                      //                       fontSize: 15,
+                                      //                       color: ColorTheme()
+                                      //                           .gradientGreen,
+                                      //                     ),
+                                      //                   ),
+                                      //                   SfLinearGauge(
+                                      //                     barPointers: [
+                                      //                       LinearBarPointer(
+                                      //                           value: 50,
+                                      //                           // Changed the thickness to make the curve visible
+                                      //                           thickness: 10,
+                                      //                           //Updated the edge style as curve at end position
+                                      //                           edgeStyle:
+                                      //                               LinearEdgeStyle
+                                      //                                   .bothCurve)
+                                      //                     ],
+                                      //                   ),
+                                      //                 ],
+                                      //               )
+                                      //             : Container()),
                                     ],
                                   ),
                                 )
