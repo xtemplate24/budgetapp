@@ -51,7 +51,7 @@ class HomePageState extends State<HomePage> {
   ];
 
   DateTime startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  DateTime endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
+  DateTime endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
   String? selectedCategory;
   double exchangeRate = 1;
   bool transactionSubmitted = false;
@@ -113,12 +113,12 @@ class HomePageState extends State<HomePage> {
     if (decrease_month) {
       setState(() {
         startDate = DateTime(startDate.year, startDate.month - 1, 1);
-        endDate = DateTime(endDate.year, endDate.month, 0);
+        endDate = DateTime(endDate.year, endDate.month - 1, 1);
       });
     } else {
       setState(() {
         startDate = DateTime(startDate.year, startDate.month + 1, 1);
-        endDate = DateTime(endDate.year, endDate.month + 2, 0);
+        endDate = DateTime(endDate.year, endDate.month + 1, 1);
       });
     }
     spendingByCategory.forEach((key, value) {
@@ -170,7 +170,7 @@ class HomePageState extends State<HomePage> {
 
     querySnapshot = await userTransactionsRef!
         .where("datetime", isGreaterThanOrEqualTo: startDate)
-        .where("datetime", isLessThanOrEqualTo: endDate)
+        .where("datetime", isLessThan: endDate)
         .get();
     transactions = querySnapshot.docs.map((doc) => doc.data() as Map).toList();
     if (transactions.isEmpty) {
@@ -828,7 +828,7 @@ class HomePageState extends State<HomePage> {
                           stream: userTransactionsRef
                               ?.where("datetime",
                                   isGreaterThanOrEqualTo: startDate)
-                              .where("datetime", isLessThanOrEqualTo: endDate)
+                              .where("datetime", isLessThan: endDate)
                               .orderBy("datetime", descending: true)
                               .snapshots(),
                           builder:
