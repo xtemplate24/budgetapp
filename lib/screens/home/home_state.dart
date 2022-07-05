@@ -674,6 +674,7 @@ class HomePageState extends State<HomePage> {
                                           thickness: 15,
                                           edgeStyle: LinearEdgeStyle.bothCurve),
                                       barPointers: [
+                         
                                         LinearBarPointer(
                                             color: ColorTheme().chart1,
                                             value: totalMonthlySpend,
@@ -681,7 +682,18 @@ class HomePageState extends State<HomePage> {
                                             thickness: 15,
                                             //Updated the edge style as curve at end position
                                             edgeStyle:
-                                                LinearEdgeStyle.bothCurve)
+                                                LinearEdgeStyle.bothCurve),
+                                                               LinearBarPointer(
+                                                                color: ColorTheme().chart2,
+                                          // offset: 2,
+                                          // position: LinearElementPosition.inside,
+                                            value: startDate.month != DateTime.now().month ? totalMonthlyBudget :
+                                            totalMonthlyBudget/ DateTime(endDate.year,endDate.month, 0).day * DateTime.now().day,
+                                            // Changed the thickness to make the curve visible
+                                            thickness: 7,
+                                            //Updated the edge style as curve at end position
+                                            edgeStyle:
+                                                LinearEdgeStyle.bothCurve),
                                       ],
                                       markerPointers: [
                                         LinearWidgetPointer(
@@ -779,52 +791,6 @@ class HomePageState extends State<HomePage> {
                                                   LegendItemOverflowMode.wrap,
                                             ),
                                           )),
-                                      // Container(
-                                      //     child:
-                                      //         startDate.month ==
-                                      //                 DateTime.now().month
-                                      //             ? Column(
-                                      //                 children: [
-                                      //                   Text(
-                                      //                     totalMonthlySpend /
-                                      //                                 totalMonthlyBudget >
-                                      //                             (startDate.day /
-                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
-                                      //                                         .day) *
-                                      //                                 totalMonthlyBudget
-                                      //                         ? "Spending rate optimal ${                 totalMonthlySpend /
-                                      //                                 totalMonthlyBudget >
-                                      //                             (startDate.day /
-                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
-                                      //                                         .day) *
-                                      //                                 totalMonthlyBudget}"
-                                      //                         : 'Spending rate not optimal ${                 totalMonthlySpend /
-                                      //                                 totalMonthlyBudget >
-                                      //                             (startDate.day /
-                                      //                                     DateTime(startDate.year, startDate.month + 1, 0)
-                                      //                                         .day) *
-                                      //                                 totalMonthlyBudget}',
-                                      //                     style: TextStyle(
-                                      //                       fontSize: 15,
-                                      //                       color: ColorTheme()
-                                      //                           .gradientGreen,
-                                      //                     ),
-                                      //                   ),
-                                      //                   SfLinearGauge(
-                                      //                     barPointers: [
-                                      //                       LinearBarPointer(
-                                      //                           value: 50,
-                                      //                           // Changed the thickness to make the curve visible
-                                      //                           thickness: 10,
-                                      //                           //Updated the edge style as curve at end position
-                                      //                           edgeStyle:
-                                      //                               LinearEdgeStyle
-                                      //                                   .bothCurve)
-                                      //                     ],
-                                      //                   ),
-                                      //                 ],
-                                      //               )
-                                      //             : Container()),
                                     ],
                                   ),
                                 )
